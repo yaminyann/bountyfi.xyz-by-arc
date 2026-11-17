@@ -17,6 +17,7 @@ import { SignJWT, exportJWK, generateKeyPair } from 'jose'
 import { runEcosystemChecks } from './ecosystem.mjs'
 import { runTrustChecks, startFakes } from './trust.mjs'
 import { runInsightChecks } from './insights.mjs'
+import { runSectorChecks } from './sectors.mjs'
 import { createPublicClient, createWalletClient, http as viemHttp, defineChain } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
@@ -422,6 +423,7 @@ try {
   await runEcosystemChecks({ api, tok, accounts, send, board, boardArtifact, usdc, mock, bountyCommitment, submissionCommitment, check, waitFor, db, reward })
   await runTrustChecks({ api, tok, accounts, send, board, boardArtifact, usdc, mock, bountyCommitment, submissionCommitment, check, waitFor, db, apiBase: API }, fakes)
   await runInsightChecks({ api, tok, accounts, send, board, boardArtifact, usdc, mock, bountyCommitment, submissionCommitment, check, waitFor, db, apiBase: API }, fakes)
+  await runSectorChecks({ api, tok, accounts, send, read, board, boardArtifact, usdc, mock, bountyCommitment, submissionCommitment, check, waitFor, db })
 } catch (err) {
   failures += 1
   console.error('\nE2E aborted:', err)

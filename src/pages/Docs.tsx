@@ -67,6 +67,32 @@ function Pair({ term, children }: { term: string; children: ReactNode }) {
   )
 }
 
+/** What to ask for as proof of finished work in each kind of work. The creator reviews it against the acceptance criteria. */
+const PROOF: Record<string, string> = {
+  security: 'A written report with steps to reproduce. Turn on encrypted reports for anything sensitive.',
+  development: 'A pull request link. Its state and author are read from GitHub and shown next to the submission.',
+  design: 'Source files or a public prototype link, with the usage rights stated.',
+  research: 'A report with its sources and the data behind each claim.',
+  community: 'Public links to the posts, threads or sessions, with the results the task asked for.',
+  testing: 'A test report with the steps taken, what was found and how to repeat it.',
+  'smart-contracts': 'A branch or pull request with passing tests and a short note on what the tests cover.',
+  docs: 'The published page or a pull request, tested by following it on a clean setup.',
+  content: 'The published article link, with sources and the length the task asked for.',
+  translation: 'The translated files or a pull request, reviewed by a second native speaker.',
+  video: 'A public link and the source project file, with captions where the task asks for them.',
+  marketing: 'A log of what was sent, who replied and what came of it.',
+  data: 'A public dashboard link with the queries linked, so the numbers can be rerun.',
+  governance: 'The proposal text or forum link, with the template or worked example the task asked for.',
+  defi: 'A reproducible notebook or model, with the scenarios and a written conclusion.',
+  ai: 'A repository with a documented tool and a passing test run.',
+  infrastructure: 'The configuration, a runbook and proof that a test alert fired.',
+  payments: 'A working demo that completes a test payment, plus the pull request.',
+  games: 'Layered source files and a delivery note that states the usage rights.',
+  education: 'The outline, slides and exercises, or a recording of the session.',
+  events: 'A recording or summary, the attendance list and the follow-up post.',
+  support: 'A log of the tickets triaged or questions answered, with links.',
+}
+
 interface DocSection {
   id: string
   title: string
@@ -245,9 +271,34 @@ function useSections(): DocSection[] {
             {(categories.data ?? []).map((c) => (
               <Pair key={c.slug} term={c.name}>
                 {c.description} <span className="text-ink/80">{c.examples.slice(0, 4).join(', ')}.</span>
+                <span className="mt-1 block text-ink/80">
+                  <strong className="font-medium">Ask for:</strong> {PROOF[c.slug] ?? 'A public link or files that show every point of the acceptance criteria.'}
+                </span>
               </Pair>
             ))}
           </dl>
+          <H3>How a task is checked</H3>
+          <P>The escrow works the same way for every kind of work. Some checks are automatic and some are a person’s decision, and it helps to know which is which before you post or take a task.</P>
+          <dl className="max-w-[68ch]">
+            <Pair term="Automatic">The prize is locked in the contract before the task is listed. The text must match the hash recorded on-chain. The deadline, the prize split, the fees and the payout are enforced by the contract. For code, a linked GitHub pull request shows its state and author. A submission’s notes are shown as verified only when they match their hash.</Pair>
+            <Pair term="The creator decides">Whether the work meets the acceptance criteria is a judgment, in every kind of work. The creator reviews each submission in its thread, can ask for changes, and picks the winners. Nothing pays out until they do, and only the creator’s wallet can pick.</Pair>
+            <Pair term="Not automatic">BountyFi does not score quality, run oracles or release a prize on its own. A dispute thread with a mediator is available when the two sides disagree. Its outcome is recorded and does not move USDC.</Pair>
+          </dl>
+          <H3>Make your task easy to check</H3>
+          <Ul>
+            <li>Write acceptance criteria you can answer yes or no to, such as a word count, a test that passes, a link that is public.</li>
+            <li>Ask for a public link or files, so the proof can be opened by anyone who needs to check it.</li>
+            <li>Split large work into milestones, so each piece is reviewed on its own.</li>
+            <li>Turn on encrypted reports when the deliverable is sensitive.</li>
+            <li>Set a deadline you can honour: after it, you have 7 days to review before you can take the prize back.</li>
+          </Ul>
+          <H3>Guide: post and take your first task</H3>
+          <Ol>
+            <li>Posting: open Post a bounty from your workspace, choose the kind of work, write the criteria and the proof you need, set the prize and the places, then fund it. An admin approves it before it is listed.</li>
+            <li>Taking: filter Explore by the kind of work, open a task, read the criteria and submit before the deadline with a link to your work.</li>
+            <li>Reviewing: the creator reads your submission, may ask for changes in its thread, and picks the winner on-chain.</li>
+            <li>Getting paid: the winner claims from the bounty page within 7 days and receives the prize minus the 5% claim fee.</li>
+          </Ol>
           <H3>Who posts</H3>
           <P>Solo maintainers, startups and studios, DAOs and foundations, exchanges and wallets, and communities. A single bounty and a ranked multi-winner program use the same escrow.</P>
           <H3>Who gets paid</H3>
