@@ -52,3 +52,7 @@ server/dist/
 
 # forge script broadcast output
 broadcast/
+
+# Local machine helpers (personal paths)
+forge.cmd
+powershell.cmd
