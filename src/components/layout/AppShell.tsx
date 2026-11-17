@@ -2,6 +2,7 @@ import { Suspense, type ReactNode } from 'react'
 import { useAccount, useSwitchChain } from 'wagmi'
 import { useAuth } from '@/contexts/AuthContext'
 import { Header } from '@/components/layout/Header'
+import { BottomNav } from '@/components/layout/BottomNav'
 import { Footer } from '@/components/layout/Footer'
 import { IdentityGuide } from '@/components/layout/IdentityGuide'
 import { WalletDialog } from '@/components/layout/WalletDialog'
@@ -55,14 +56,14 @@ function AuthNotice() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded focus:border-2 focus:border-ink focus:bg-signal focus:px-3 focus:py-2 focus:text-sm focus:font-semibold"
       >
         Skip to content
       </a>
-      <div className="bg-ink px-4 py-1 text-center text-xs text-white/85">
+      <div className="border-b border-ink/10 bg-sky px-4 py-1.5 text-center text-xs text-ink">
         {appChain.testnet ? 'Arc Testnet. All USDC here is test money with no real value.' : `Connected to ${appChain.name}`}
       </div>
       <Header />
@@ -81,6 +82,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Suspense>
       </main>
       <Footer />
+      <BottomNav />
       <IdentityGuide />
       <WalletDialog />
     </div>

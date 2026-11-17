@@ -6,24 +6,15 @@ import { shortAddress } from '@/lib/money'
 
 const YEAR = new Date().getFullYear()
 
-const LINK = 'text-sm text-white/70 underline-offset-4 hover:text-white hover:underline'
+const LINK = 'text-sm text-mute underline-offset-4 transition-colors hover:text-ink hover:underline'
 
-function Column({ title, children }: { title: string; children: ReactNode }) {
+function Fact({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <nav aria-label={title} className="space-y-4">
-      <p className="text-sm font-semibold text-white">{title}</p>
-      <ul className="space-y-2.5">{children}</ul>
-    </nav>
-  )
-}
-
-function ExternalItem({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <li>
-      <a href={href} target="_blank" rel="noopener noreferrer" className={LINK}>
-        {children}
-      </a>
-    </li>
+    <div className="ledger-line text-sm">
+      <dt className="text-mute">{label}</dt>
+      <span aria-hidden className="leader" />
+      <dd className="num text-ink">{children}</dd>
+    </div>
   )
 }
 
@@ -33,86 +24,63 @@ export function Footer() {
   const treasury = config.data?.treasuryAddress
 
   return (
-    <footer className="on-ink mt-24 bg-ink text-white">
-      <div className="mx-auto max-w-6xl px-4 pb-8 pt-14">
-        <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
-          <div className="space-y-5">
-            <Link to="/" aria-label="BountyFi home" className="inline-block">
-              <img src="/brand/lockup.png" alt="BountyFi" width={760} height={186} className="h-auto w-52" />
+    <footer className="mt-24 border-t border-ink/15 bg-surface">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 pb-10 pt-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+        <div className="space-y-5">
+          <Link to="/" aria-label="BountyFi home" className="inline-block">
+            <img src="/brand/lockup.png" alt="BountyFi" width={760} height={186} className="h-auto w-44" />
+          </Link>
+          <p className="max-w-sm text-sm text-mute">Prizes stay in a smart contract until the creator picks the winners. Built on Arc.</p>
+          <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-2 pt-1">
+            <Link className={LINK} to="/explore">
+              Explore
             </Link>
-            <p className="max-w-xs text-sm text-white/70">
-              Turn any problem into a reward. Prizes stay in a smart contract until the creator picks the winners.
-            </p>
-            <p className="text-sm font-semibold">
-              <a href="https://bountyfi.xyz" className="text-signal underline-offset-4 hover:underline">
-                bountyfi.xyz
+            <Link className={LINK} to="/projects">
+              Projects
+            </Link>
+            <Link className={LINK} to="/leaderboard">
+              Leaderboard
+            </Link>
+            <Link className={LINK} to="/activity">
+              Activity
+            </Link>
+            <Link className={LINK} to="/docs">
+              Docs
+            </Link>
+            <Link className={LINK} to="/developers">
+              Developers
+            </Link>
+            <Link className={LINK} to="/help">
+              Wallet help
+            </Link>
+            <a className={LINK} href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer">
+              Test USDC faucet
+            </a>
+          </nav>
+        </div>
+
+        <dl className="space-y-3 self-start rounded-lg border border-line bg-paper p-5">
+          <p className="pixel-label pb-1 text-mute">ON-CHAIN</p>
+          <Fact label="Network">{appChain.name}</Fact>
+          {contract && (
+            <Fact label="Contract">
+              <a href={explorerAddress(contract)} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">
+                {shortAddress(contract)}
               </a>
-            </p>
-          </div>
-
-          <Column title="Discover">
-            <li>
-              <Link className={LINK} to="/explore">
-                Explore bounties
-              </Link>
-            </li>
-            <li>
-              <Link className={LINK} to="/categories">
-                Categories
-              </Link>
-            </li>
-            <li>
-              <Link className={LINK} to="/projects">
-                Projects
-              </Link>
-            </li>
-            <li>
-              <Link className={LINK} to="/leaderboard">
-                Leaderboard
-              </Link>
-            </li>
-            <li>
-              <Link className={LINK} to="/activity">
-                Activity
-              </Link>
-            </li>
-          </Column>
-
-          <Column title="Build">
-            <li>
-              <Link className={LINK} to="/create">
-                Post a bounty
-              </Link>
-            </li>
-            <li>
-              <Link className={LINK} to="/dashboard">
-                Workspace
-              </Link>
-            </li>
-            <li>
-              <Link className={LINK} to="/help">
-                How it works
-              </Link>
-            </li>
-            <li>
-              <Link className={LINK} to="/developers">
-                Developers
-              </Link>
-            </li>
-            <ExternalItem href="https://faucet.circle.com">Get test USDC</ExternalItem>
-          </Column>
-
-          <Column title="On-chain">
-            <li className="text-sm text-white/70">Network: {appChain.name}</li>
-            {contract && <ExternalItem href={explorerAddress(contract)}>Contract {shortAddress(contract)}</ExternalItem>}
-            {treasury && <ExternalItem href={explorerAddress(treasury)}>Fee wallet {shortAddress(treasury)}</ExternalItem>}
-          </Column>
-        </div>
-
-        <div className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-6 text-xs text-white/60">
-          <p>© {YEAR} BountyFi. All rights reserved.</p>
-          <p>{appChain.testnet ? 'Test USDC on Arc Testnet has no real value.' : 'Transactions are final and settle on-chain.'}</p>
-        </div>
+            </Fact>
+          )}
+          {treasury && (
+            <Fact label="Fee wallet">
+              <a href={explorerAddress(treasury)} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">
+                {shortAddress(treasury)}
+              </a>
+            </Fact>
+          )}
+          <p className="pt-1 text-xs text-mute">{appChain.testnet ? 'Test USDC on Arc Testnet has no real value.' : 'Transactions are final and settle on-chain.'}</p>
+        </dl>
+      </div>
+      <div className="border-t border-line">
+        <p className="mx-auto max-w-6xl px-4 py-5 text-xs text-mute">© {YEAR} BountyFi. The contract has not had an independent audit.</p>
       </div>
     </footer>
   )

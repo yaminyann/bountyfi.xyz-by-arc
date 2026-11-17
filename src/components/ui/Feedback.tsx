@@ -126,7 +126,7 @@ export function PageHeader({ title, children, actions, className }: { title: str
   return (
     <div className={cn('mb-6 flex flex-wrap items-end justify-between gap-4', className)}>
       <div className="min-w-0">
-        <h1 className="font-display text-2xl font-semibold sm:text-3xl">{title}</h1>
+        <h1 className="page-title">{title}</h1>
         {children && <p className="mt-1.5 max-w-2xl text-sm text-mute sm:text-base">{children}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}

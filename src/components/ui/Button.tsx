@@ -7,13 +7,13 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'dark' | 'accent'
 type Size = 'sm' | 'md' | 'lg'
 
 const BASE =
-  'inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-md border font-medium transition-colors duration-100 disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
+  'inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-md border font-medium transition-[background-color,border-color,transform,box-shadow] duration-150 disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'on-ink border-ink bg-ink text-white hover:bg-neutral-800',
-  dark: 'on-ink border-ink bg-ink text-white hover:bg-neutral-800',
+  primary: 'on-ink border-ink bg-ink text-white hover:bg-[#223247]',
+  dark: 'on-ink border-ink bg-ink text-white hover:bg-[#223247]',
   // The brand yellow is kept for the single most important action on a screen.
-  accent: 'border-signal-deep/60 bg-signal text-ink hover:bg-signal-deep',
+  accent: 'border-ink bg-signal text-ink shadow-retro-sm hover:-translate-x-px hover:-translate-y-px hover:bg-signal hover:shadow-retro active:translate-x-px active:translate-y-px active:shadow-none',
   secondary: 'border-line bg-surface text-ink hover:border-ink/30 hover:bg-paper',
   ghost: 'border-transparent bg-transparent text-ink hover:bg-ink/5',
   danger: 'border-danger/40 bg-surface text-danger hover:bg-danger-soft',

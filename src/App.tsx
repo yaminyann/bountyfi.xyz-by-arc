@@ -16,6 +16,7 @@ const Activity = lazy(() => import('@/pages/Activity'))
 const Help = lazy(() => import('@/pages/Help'))
 const Leaderboard = lazy(() => import('@/pages/Leaderboard'))
 const Developers = lazy(() => import('@/pages/Developers'))
+const Docs = lazy(() => import('@/pages/Docs'))
 const DisputePage = lazy(() => import('@/pages/workspace/DisputePage'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
@@ -71,6 +72,8 @@ export default function App() {
         <Route path="/help" element={<Help />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/developers" element={<Developers />} />
+        <Route path="/docs" element={<Docs />} />
+        <Route path="/vision" element={<Navigate to="/docs#vision" replace />} />
 
         {/* Signed-in workspace */}
         <Route element={<WorkspaceLayout />}>

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { BookOpen } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useIdentity } from '@/contexts/IdentityContext'
@@ -60,7 +61,8 @@ export function SidebarNav({ signedIn, onNavigate, includeDiscover = true }: { s
           {DISCOVER_NAV.map((item) => (
             <Item key={item.to} item={item} onNavigate={onNavigate} />
           ))}
-          <Item item={{ to: '/help', label: 'How it works', icon: DISCOVER_NAV[0].icon }} onNavigate={onNavigate} />
+          <Item item={{ to: '/docs', label: 'Docs', icon: BookOpen }} onNavigate={onNavigate} />
+          <Item item={{ to: '/help', label: 'Wallet help', icon: DISCOVER_NAV[0].icon }} onNavigate={onNavigate} />
         </Group>
       )}
       {signedIn ? (

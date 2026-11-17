@@ -44,7 +44,7 @@ function NotificationsLink() {
     <Link
       to="/notifications"
       aria-label={count > 0 ? `Notifications, ${count} unread` : 'Notifications'}
-      className="relative grid size-9 place-items-center rounded-md text-mute hover:bg-ink/5 hover:text-ink"
+      className="relative grid size-11 place-items-center rounded-md text-mute hover:bg-ink/5 hover:text-ink sm:size-9"
     >
       <Bell size={18} aria-hidden />
       {count > 0 && <span aria-hidden className="absolute right-1.5 top-1.5 size-2 rounded-full bg-signal-deep ring-2 ring-surface" />}
@@ -118,6 +118,17 @@ function AccountMenu() {
   )
 }
 
+/** On phones the account lives in the bottom sheet, but a visitor still needs one obvious way to connect. */
+function PhoneConnect() {
+  const id = useIdentity()
+  if (id.status !== 'none') return null
+  return (
+    <Button size="sm" variant="primary" className="sm:hidden" onClick={id.connectWallet}>
+      Connect
+    </Button>
+  )
+}
+
 const TOP_LINK = 'whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-mute transition-colors hover:bg-ink/5 hover:text-ink'
 
 export function Header() {
@@ -125,7 +136,7 @@ export function Header() {
   const [drawer, setDrawer] = usePageScopedOpen()
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-ink/15 bg-surface/95 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
         <div className="flex items-center gap-6">
           <Logo />
@@ -140,13 +151,14 @@ export function Header() {
                 Workspace
               </NavLink>
             )}
-            <NavLink to="/help" className={({ isActive }) => cn(TOP_LINK, isActive && 'bg-ink/5 text-ink')}>
-              How it works
+            <NavLink to="/docs" className={({ isActive }) => cn(TOP_LINK, isActive && 'bg-ink/5 text-ink')}>
+              Docs
             </NavLink>
           </nav>
         </div>
 
         <div className="flex items-center gap-1.5">
+          <PhoneConnect />
           <NotificationsLink />
           <ButtonLink to="/create" size="sm" variant="accent" icon={<Plus size={15} aria-hidden />} className="hidden sm:inline-flex">
             Post a bounty
@@ -156,7 +168,7 @@ export function Header() {
           </div>
           <button
             type="button"
-            className="grid size-9 place-items-center rounded-md text-ink hover:bg-ink/5 xl:hidden"
+            className="hidden size-9 place-items-center rounded-md text-ink hover:bg-ink/5 lg:grid xl:hidden"
             aria-label={drawer ? 'Close menu' : 'Open menu'}
             aria-expanded={drawer}
             aria-controls="mobile-menu"
@@ -168,7 +180,7 @@ export function Header() {
       </div>
 
       {drawer && (
-        <div id="mobile-menu" className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-line bg-surface px-4 pb-6 pt-3 xl:hidden">
+        <div id="mobile-menu" className="hidden max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-line bg-surface px-4 pb-6 pt-3 lg:block xl:hidden">
           <div className="mb-4 flex flex-wrap items-center gap-2 sm:hidden">
             <ButtonLink to="/create" size="sm" variant="accent" icon={<Plus size={15} aria-hidden />}>
               Post a bounty

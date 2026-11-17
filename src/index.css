@@ -28,11 +28,11 @@
 
   ::selection {
     background: #fde047;
-    color: #0a0a0a;
+    color: #0e1621;
   }
 
   :focus-visible {
-    outline: 2px solid #0a0a0a;
+    outline: 2px solid #0e1621;
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -78,5 +78,129 @@
 
   .eyebrow {
     @apply text-xs font-medium text-mute;
+  }
+
+  /* Small labels inside artwork and on stepped counters. The pixel face is the retro voice of the brand. */
+  .pixel-label {
+    @apply font-pixel text-[10px] leading-none tracking-wide text-ink;
+  }
+
+  /* Scroll reveal: content rises into place the first time it enters the screen. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 640ms ease,
+      transform 640ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition-delay: var(--d, 0ms);
+  }
+  .reveal[data-in='true'] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Artwork pieces play once when their scene enters the screen. */
+  .a-grow-y,
+  .a-grow-x,
+  .a-drop,
+  .a-pop,
+  .a-draw {
+    transform-box: fill-box;
+    opacity: 0;
+  }
+  .a-grow-y {
+    transform-origin: bottom;
+  }
+  .a-grow-x {
+    transform-origin: left;
+  }
+  .a-pop {
+    transform-origin: center;
+  }
+  [data-in='true'] .a-grow-y {
+    opacity: 1;
+    animation: grow-y 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: var(--d, 0ms);
+  }
+  [data-in='true'] .a-grow-x {
+    opacity: 1;
+    animation: grow-x 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: var(--d, 0ms);
+  }
+  [data-in='true'] .a-drop {
+    animation: drop 640ms cubic-bezier(0.3, 0.9, 0.3, 1) both;
+    animation-delay: var(--d, 0ms);
+  }
+  [data-in='true'] .a-pop {
+    animation: pop 420ms ease-out both;
+    animation-delay: var(--d, 0ms);
+  }
+  [data-in='true'] .a-draw {
+    opacity: 1;
+    stroke-dasharray: var(--len, 120);
+    animation: draw 800ms ease-out both;
+    animation-delay: var(--d, 0ms);
+  }
+
+  /* Hard-edged panel with the retro offset. One per screen, for the featured piece. */
+  .panel-retro {
+    @apply rounded-lg border border-ink bg-surface shadow-retro;
+  }
+
+  /* Page headings on inner pages share the landing page rhythm. */
+  .page-title {
+    @apply font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl;
+  }
+}
+
+@keyframes grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes drop {
+  0% {
+    transform: translateY(-36px);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes draw {
+  from {
+    stroke-dashoffset: var(--len, 120);
+  }
+  to {
+    stroke-dashoffset: 0;
   }
 }
