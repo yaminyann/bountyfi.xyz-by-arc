@@ -62,10 +62,14 @@ export function matches(f: SearchFilters, b: BountyForMatch): boolean {
   return true
 }
 
-export async function deliver(url: string, text: string): Promise<string | null> {
-  const body = url.includes('discord') ? { content: text } : url.includes('slack') ? { text } : { text, content: text }
+export async function deliver(url: string, rawText: string): Promise<string | null> {
+  // Bounty titles come from anyone, so they must not be able to ping a channel: Slack reads <!channel> and <@user>,
+  // Discord reads @everyone, so angle brackets go and Discord is told to parse no mentions at all.
+  const text = rawText.replace(/[<>]/g, '')
+  const body = url.includes('discord') ? { content: text, allowed_mentions: { parse: [] } } : url.includes('slack') ? { text } : { text, content: text }
   try {
-    const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(5_000) })
+    // An allowlisted host must not be able to bounce the request to another address, so redirects are not followed.
+    const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(5_000), redirect: 'manual' })
     return res.ok ? null : `Webhook answered ${res.status}`
   } catch {
     return 'Webhook could not be reached'
