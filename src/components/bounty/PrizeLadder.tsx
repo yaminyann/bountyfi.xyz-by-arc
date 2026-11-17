@@ -56,7 +56,7 @@ export function PrizeLadder({ shares, payouts, winners, claimed, selfAddress, co
                 <span className="ml-2 text-mute">{bpsToPercent(share)}%</span>
               </span>
             </div>
-            <div className="mt-1.5 h-3 rounded-sm border border-ink bg-white">
+            <div className="mt-1.5 h-3 rounded-sm border border-ink bg-surface">
               <div className={cn('h-full rounded-[1px]', i === 0 ? 'bg-signal' : 'bg-ink')} style={{ width: `${(share / max) * 100}%` }} />
             </div>
             {(winner || (settled && payout !== null)) && (

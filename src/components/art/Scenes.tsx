@@ -260,32 +260,29 @@ export function ReceiptScene() {
   ]
   return (
     <Scene label="Example receipt for a 100 USDC prize with one winner: 100.50 leaves the creator, the winner receives 95.00." className="w-full">
-      <Svg viewBox="0 0 380 300">
-        <rect width="380" height="300" fill={SKY} />
+      <Svg viewBox="0 0 360 260">
+        <rect width="360" height="260" fill={SKY} />
         <g className="a-grow-y" style={d(100)}>
-          <rect x="40" y="22" width="300" height="262" fill={PAPER} stroke={INK} strokeWidth="3" />
-          {Array.from({ length: 16 }).map((_, i) => (
-            <rect key={i} x={40 + i * 20} y={284} width="10" height="8" fill={PAPER} stroke={INK} strokeWidth="2" />
-          ))}
+          <rect x="36" y="16" width="288" height="228" fill={PAPER} stroke={INK} strokeWidth="3" />
         </g>
-        <Label x={60} y={52}>
+        <Label x={52} y={42}>
           EXAMPLE RECEIPT
         </Label>
-        <rect x="60" y="62" width="260" height="2" fill={INK} />
+        <rect x="52" y="52" width="256" height="2" fill={INK} />
         {rows.map(([label, value, strong], i) => (
-          <g key={label} className="a-pop" style={d(500 + i * 220)}>
-            <text x="60" y={96 + i * 36} fontSize="12" fill={INK} fontWeight={strong ? 700 : 400} fontFamily="DM Sans, sans-serif">
+          <g key={label} className="a-pop" style={d(500 + i * 200)}>
+            <text x="52" y={80 + i * 30} fontSize="12" fill={INK} fontWeight={strong ? 700 : 400} fontFamily="DM Sans, sans-serif">
               {label}
             </text>
-            <text x="320" y={96 + i * 36} fontSize="13" textAnchor="end" fill={INK} fontWeight={strong ? 700 : 400} fontFamily="JetBrains Mono, monospace">
+            <text x="308" y={80 + i * 30} fontSize="13" textAnchor="end" fill={INK} fontWeight={strong ? 700 : 400} fontFamily="JetBrains Mono, monospace">
               {value}
             </text>
-            <rect x="60" y={102 + i * 36} width="260" height="1" fill={SKY_DEEP} />
+            <rect x="52" y={86 + i * 30} width="256" height="1" fill={SKY_DEEP} />
           </g>
         ))}
-        <g className="a-pop" style={d(1800)}>
-          <rect x="236" y="224" width="84" height="24" fill={SIGNAL} stroke={INK} strokeWidth="3" />
-          <Label x={278} y={240} anchor="middle">
+        <g className="a-pop" style={d(1700)}>
+          <rect x="232" y="212" width="76" height="22" fill={SIGNAL} stroke={INK} strokeWidth="3" />
+          <Label x={270} y={227} anchor="middle">
             USDC
           </Label>
         </g>
@@ -298,24 +295,27 @@ export function ReceiptScene() {
 export function FinalityScene() {
   return (
     <Scene label="Blocks fill in one after another and the last is marked final." className="w-full">
-      <Svg viewBox="0 0 380 200">
-        <rect width="380" height="200" fill={SKY} />
-        <rect y="150" width="380" height="50" fill={SKY_DEEP} />
-        <rect y="148" width="380" height="4" fill={INK} />
+      <Svg viewBox="0 0 360 260">
+        <rect width="360" height="260" fill={SKY} />
+        <rect y="196" width="360" height="64" fill={SKY_DEEP} />
+        <rect y="194" width="360" height="4" fill={INK} />
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <g key={i} className="a-pop" style={d(150 + i * 180)}>
-            <rect x={20 + i * 58} y={70} width="46" height="62" fill={i === 5 ? SIGNAL : PAPER} stroke={INK} strokeWidth="3" />
-            <rect x={30 + i * 58} y={82} width="26" height="4" fill={INK} />
-            <rect x={30 + i * 58} y={92} width="18" height="4" fill={SKY_DEEP} />
+            <rect x={30 + i * 52} y={126} width="40" height="68" fill={i === 5 ? SIGNAL : PAPER} stroke={INK} strokeWidth="3" />
+            <rect x={38 + i * 52} y={138} width="24" height="4" fill={INK} />
+            <rect x={38 + i * 52} y={148} width="16" height="4" fill={SKY_DEEP} />
           </g>
         ))}
-        <path d="M20 56 H348" fill="none" stroke={INK} strokeWidth="3" className="a-draw" style={{ ...d(100), ['--len' as string]: 330 } as CSSProperties} />
+        <path d="M30 100 H322" fill="none" stroke={INK} strokeWidth="3" className="a-draw" style={{ ...d(100), ['--len' as string]: 292 } as CSSProperties} />
         <g className="a-pop" style={d(1400)}>
-          <rect x="296" y="22" width="58" height="22" fill={INK} />
-          <Label x={325} y={37} anchor="middle" fill={PAPER}>
+          <rect x="278" y="56" width="52" height="24" fill={INK} />
+          <Label x={304} y={72} anchor="middle" fill={PAPER}>
             FINAL
           </Label>
         </g>
+        <Label x={180} y={232} anchor="middle">
+          UNDER 1 SECOND
+        </Label>
       </Svg>
     </Scene>
   )
@@ -324,30 +324,56 @@ export function FinalityScene() {
 /** Project workspace: coordination cards that sit beside the escrow and never hold money. */
 export function BoardScene() {
   const cols = [
-    { x: 24, title: 'MILESTONES', rows: 3 },
-    { x: 134, title: 'REVIEWS', rows: 2 },
+    { x: 20, title: 'MILESTONES', rows: 3 },
+    { x: 132, title: 'REVIEWS', rows: 2 },
     { x: 244, title: 'TEAM', rows: 3 },
   ]
   return (
     <Scene label="A project board with columns for milestones, reviews and team roles." className="w-full">
-      <Svg viewBox="0 0 360 240">
-        <rect width="360" height="240" fill={SKY} />
+      <Svg viewBox="0 0 360 260">
+        <rect width="360" height="260" fill={SKY} />
         {cols.map((c, ci) => (
           <g key={c.title}>
-            <rect x={c.x} y="24" width="96" height="192" fill={PAPER} stroke={INK} strokeWidth="3" />
-            <rect x={c.x} y="24" width="96" height="22" fill={INK} />
-            <Label x={c.x + 48} y={39} anchor="middle" fill={PAPER}>
+            <rect x={c.x} y="20" width="96" height="220" fill={PAPER} stroke={INK} strokeWidth="3" />
+            <rect x={c.x} y="20" width="96" height="24" fill={INK} />
+            <Label x={c.x + 48} y={36} anchor="middle" fill={PAPER}>
               {c.title}
             </Label>
             {Array.from({ length: c.rows }).map((_, r) => (
               <g key={r} className="a-drop" style={d(200 + ci * 160 + r * 140)}>
-                <rect x={c.x + 8} y={56 + r * 52} width="80" height="42" fill={r === 0 ? SIGNAL : SKY} stroke={INK} strokeWidth="2" />
-                <rect x={c.x + 14} y={64 + r * 52} width="44" height="5" fill={INK} />
-                <rect x={c.x + 14} y={76 + r * 52} width="60" height="4" fill={r === 0 ? SIGNAL_DEEP : SKY_DEEP} />
+                <rect x={c.x + 8} y={56 + r * 56} width="80" height="44" fill={r === 0 ? SIGNAL : SKY} stroke={INK} strokeWidth="2" />
+                <rect x={c.x + 14} y={64 + r * 56} width="44" height="6" fill={INK} />
+                <rect x={c.x + 14} y={78 + r * 56} width="60" height="4" fill={r === 0 ? SIGNAL_DEEP : SKY_DEEP} />
               </g>
             ))}
           </g>
         ))}
+      </Svg>
+    </Scene>
+  )
+}
+
+/** An address with nothing at it: an empty tray and a dashed card that never landed. */
+export function NotFoundScene() {
+  return (
+    <Scene label="An empty tray with a dashed outline where a page should be." className="w-full">
+      <Svg viewBox="0 0 360 260">
+        <rect width="360" height="260" fill={SKY} />
+        <rect y="196" width="360" height="64" fill={SKY_DEEP} />
+        <rect y="194" width="360" height="4" fill={INK} />
+        <rect x="96" y="70" width="168" height="124" fill="none" stroke={INK} strokeWidth="3" strokeDasharray="8 6" className="a-pop" style={d(200)} />
+        <g className="a-drop" style={d(500)}>
+          <rect x="132" y="102" width="96" height="60" fill={PAPER} stroke={INK} strokeWidth="3" />
+          <rect x="144" y="116" width="40" height="6" fill={INK} />
+          <rect x="144" y="130" width="68" height="4" fill={SKY_DEEP} />
+          <rect x="144" y="140" width="52" height="4" fill={SKY_DEEP} />
+        </g>
+        <g className="a-pop" style={d(900)}>
+          <rect x="140" y="36" width="80" height="26" fill={SIGNAL} stroke={INK} strokeWidth="3" />
+          <Label x={180} y={53} anchor="middle">
+            NOT FOUND
+          </Label>
+        </g>
       </Svg>
     </Scene>
   )

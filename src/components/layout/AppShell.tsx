@@ -1,4 +1,5 @@
 import { Suspense, type ReactNode } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAccount, useSwitchChain } from 'wagmi'
 import { useAuth } from '@/contexts/AuthContext'
 import { Header } from '@/components/layout/Header'
@@ -54,7 +55,16 @@ function AuthNotice() {
   )
 }
 
+const FALLBACK = (
+  <div className="grid place-items-center py-24">
+    <Spinner size={28} />
+  </div>
+)
+
 export function AppShell({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation()
+  // The admin console is its own full-page application with its own navigation, so the public frame stays out of it.
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) return <Suspense fallback={FALLBACK}>{children}</Suspense>
   return (
     <div className="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
       <a

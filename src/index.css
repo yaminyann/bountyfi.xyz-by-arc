@@ -73,7 +73,7 @@
 
   /* Quiet surface used for grouped content */
   .panel {
-    @apply rounded-lg border border-line bg-surface;
+    @apply rounded-lg border border-line bg-surface shadow-card;
   }
 
   .eyebrow {
@@ -82,7 +82,7 @@
 
   /* Small labels inside artwork and on stepped counters. The pixel face is the retro voice of the brand. */
   .pixel-label {
-    @apply font-pixel text-[10px] leading-none tracking-wide text-ink;
+    @apply font-pixel text-[11px] leading-none tracking-wide text-ink;
   }
 
   /* Scroll reveal: content rises into place the first time it enters the screen. */

@@ -53,7 +53,7 @@ export default function Activity() {
       ) : items.length === 0 ? (
         <EmptyState title="No activity yet">Events show up here as people create, fund, submit to and settle bounties.</EmptyState>
       ) : (
-        <ol className="divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
+        <ol className="divide-y divide-line overflow-hidden rounded-md border border-line bg-surface">
           {items.map((a) => (
             <li key={a.id} className="grid gap-1 px-4 py-3 sm:grid-cols-[1fr_auto] sm:items-center">
               <div className="min-w-0">

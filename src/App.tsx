@@ -1,6 +1,7 @@
 import { lazy, useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
+import { PageMeta } from '@/components/layout/PageMeta'
 import { WorkspaceLayout } from '@/components/layout/Sidebar'
 
 // Each page is its own chunk, so the first visit only downloads what it shows.
@@ -58,6 +59,7 @@ export default function App() {
   return (
     <AppShell>
       <ScrollToTop />
+      <PageMeta />
       <Routes>
         {/* Discover */}
         <Route path="/" element={<Landing />} />

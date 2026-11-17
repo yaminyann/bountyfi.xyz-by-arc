@@ -257,8 +257,8 @@ function adminList<T>(name: string, path: string, params: Record<string, string 
   }
 }
 
-export const useAdminOverview = () =>
-  useQuery({ queryKey: ['admin', 'overview'], queryFn: () => get<AdminOverview>('/admin/overview'), staleTime: 10_000 })
+export const useAdminOverview = (enabled = true) =>
+  useQuery({ queryKey: ['admin', 'overview'], queryFn: () => get<AdminOverview>('/admin/overview'), staleTime: 10_000, enabled })
 
 export const useAdminBounties = (params: { moderation: string; status?: string; search?: string; limit: number; offset: number }) =>
   useQuery(adminList<AdminBounty>('bounties', 'bounties', params))

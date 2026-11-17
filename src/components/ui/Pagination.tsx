@@ -38,7 +38,7 @@ export function Pagination({ total, limit, offset, onChange, className }: Pagina
             onClick={() => go(current - 1)}
             disabled={current === 1}
             aria-label="Previous page"
-            className="grid size-9 place-items-center rounded border border-line bg-white hover:bg-ink/5 disabled:opacity-40"
+            className="grid size-9 place-items-center rounded border border-line bg-surface hover:bg-ink/5 disabled:opacity-40"
           >
             <ChevronLeft size={16} aria-hidden />
           </button>
@@ -56,7 +56,7 @@ export function Pagination({ total, limit, offset, onChange, className }: Pagina
                 aria-current={n === current ? 'page' : undefined}
                 className={cn(
                   'num size-9 rounded border-2 text-sm font-semibold',
-                  n === current ? 'border-ink bg-ink text-white' : 'border-transparent hover:border-ink hover:bg-white',
+                  n === current ? 'border-ink bg-ink text-white' : 'border-transparent hover:border-ink hover:bg-surface',
                 )}
               >
                 {n}
@@ -70,7 +70,7 @@ export function Pagination({ total, limit, offset, onChange, className }: Pagina
             onClick={() => go(current + 1)}
             disabled={current === pages}
             aria-label="Next page"
-            className="grid size-9 place-items-center rounded border border-line bg-white hover:bg-ink/5 disabled:opacity-40"
+            className="grid size-9 place-items-center rounded border border-line bg-surface hover:bg-ink/5 disabled:opacity-40"
           >
             <ChevronRight size={16} aria-hidden />
           </button>

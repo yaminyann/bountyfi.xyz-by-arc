@@ -1,5 +1,28 @@
 import type { ComponentType, ReactNode } from 'react'
-import { AlertTriangle, CheckCircle2, Info, XCircle, type LucideProps } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
+import {
+  Activity,
+  AlertTriangle,
+  BookOpen,
+  Bell,
+  Braces,
+  BriefcaseBusiness,
+  CheckCircle2,
+  Coins,
+  Compass,
+  FolderKanban,
+  GitPullRequest,
+  Inbox,
+  Info,
+  LayoutDashboard,
+  LayoutGrid,
+  PlusCircle,
+  Settings,
+  Trophy,
+  Users,
+  XCircle,
+  type LucideProps,
+} from 'lucide-react'
 import { cn } from '@/lib/cn'
 
 export function Spinner({ size = 20, className }: { size?: number; className?: string }) {
@@ -93,8 +116,8 @@ export function EmptyState({
   return (
     <div className={cn('rounded-lg border border-line bg-surface px-6 py-12 text-center', className)}>
       {Icon && (
-        <span className="mx-auto mb-4 grid size-10 place-items-center rounded-full bg-ink/5 text-mute">
-          <Icon size={20} aria-hidden />
+        <span className="mx-auto mb-4 grid size-11 place-items-center rounded-md border border-ink bg-sky text-ink">
+          <Icon size={20} strokeWidth={1.75} aria-hidden />
         </span>
       )}
       <p className="font-display text-lg font-semibold">{title}</p>
@@ -113,7 +136,7 @@ export function ErrorState({ title = 'This did not load', message, onRetry }: { 
         <button
           type="button"
           onClick={onRetry}
-          className="mt-5 inline-flex h-9 items-center rounded-md border border-line bg-surface px-4 text-sm font-medium hover:border-ink/30"
+          className="mt-5 inline-flex h-10 items-center rounded-md border border-line bg-surface px-4 text-sm font-medium transition-colors hover:border-ink/40"
         >
           Try again
         </button>
@@ -122,12 +145,42 @@ export function ErrorState({ title = 'This did not load', message, onRetry }: { 
   )
 }
 
+const HEADER_ICONS: [string, ComponentType<LucideProps>][] = [
+  ['/explore', Compass],
+  ['/categories', LayoutGrid],
+  ['/projects', FolderKanban],
+  ['/leaderboard', Trophy],
+  ['/activity', Activity],
+  ['/developers', Braces],
+  ['/help', BookOpen],
+  ['/create', PlusCircle],
+  ['/dashboard/owner', BriefcaseBusiness],
+  ['/dashboard', LayoutDashboard],
+  ['/workspace/projects', FolderKanban],
+  ['/workspace/contributions', GitPullRequest],
+  ['/workspace/teams', Users],
+  ['/submissions', Inbox],
+  ['/rewards', Coins],
+  ['/notifications', Bell],
+  ['/settings', Settings],
+]
+
+/** Page title block shared by every inner page: an icon tile chosen from the route, the title, and a hairline below. */
 export function PageHeader({ title, children, actions, className }: { title: string; children?: ReactNode; actions?: ReactNode; className?: string }) {
+  const { pathname } = useLocation()
+  const Icon = HEADER_ICONS.find(([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`))?.[1]
   return (
-    <div className={cn('mb-6 flex flex-wrap items-end justify-between gap-4', className)}>
-      <div className="min-w-0">
-        <h1 className="page-title">{title}</h1>
-        {children && <p className="mt-1.5 max-w-2xl text-sm text-mute sm:text-base">{children}</p>}
+    <div className={cn('mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-ink/15 pb-6', className)}>
+      <div className="flex min-w-0 items-start gap-4">
+        {Icon && (
+          <span className="hidden size-12 shrink-0 place-items-center rounded-md border border-ink bg-sky shadow-retro-sm sm:grid">
+            <Icon size={22} strokeWidth={1.75} aria-hidden />
+          </span>
+        )}
+        <div className="min-w-0">
+          <h1 className="page-title">{title}</h1>
+          {children && <p className="mt-1.5 max-w-2xl text-sm text-mute sm:text-base">{children}</p>}
+        </div>
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>

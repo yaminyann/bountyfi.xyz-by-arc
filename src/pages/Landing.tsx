@@ -1,6 +1,26 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import {
+  ArrowRight,
+  BadgeCheck,
+  Bell,
+  Braces,
+  Check,
+  ChevronDown,
+  Coins,
+  Database,
+  FileCheck2,
+  GitPullRequest,
+  Hash,
+  KeyRound,
+  Lock,
+  ScanSearch,
+  Terminal,
+  Timer,
+  Trophy,
+  Webhook,
+  type LucideIcon,
+} from 'lucide-react'
 import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedback'
 import { PrizeCalculator } from '@/components/bounty/PrizeCalculator'
@@ -125,11 +145,11 @@ function Categories() {
           All categories <ArrowRight size={14} aria-hidden />
         </Link>
       </div>
-      <ul className="grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
         {query.data.map((c) => {
           const Icon = categoryIcon(c.icon)
           return (
-            <li key={c.slug} className="bg-surface">
+            <li key={c.slug} className="min-w-0 bg-surface">
               <Link to={`/explore?category=${c.slug}`} className="flex h-full gap-3 p-4 transition-colors hover:bg-ink/[0.02]">
                 <Icon size={18} aria-hidden className="mt-0.5 shrink-0 text-mute" />
                 <span className="min-w-0">
@@ -160,6 +180,64 @@ const STEPS: { title: string; body: string; scene: ReactNode }[] = [
   { title: 'Claim', body: 'Each winner claims within 7 days of approval and keeps the prize minus the 5% claim fee. Anything unclaimed can go back to the creator.', scene: <ClaimScene /> },
 ]
 
+const CHECKS: { icon: LucideIcon; title: string; body: string }[] = [
+  { icon: Hash, title: 'Text locked by hash', body: 'Bounty and submission text must match a hash recorded on-chain, so nobody can edit it afterwards.' },
+  { icon: Trophy, title: 'Ranked prize places', body: 'One winner, an equal split or up to ten ranked places. Unused places return to the creator.' },
+  { icon: GitPullRequest, title: 'Pull request checks', body: 'A linked GitHub pull request shows its state and author next to the submission.' },
+  { icon: KeyRound, title: 'Encrypted reports', body: 'Security reports are encrypted in the browser to the creator. The server stores ciphertext only.' },
+  { icon: Bell, title: 'Alerts', body: 'Save a search and get told when a match goes live, in the app or in a chat channel.' },
+  { icon: BadgeCheck, title: 'README badge', body: 'A live badge with a project’s open bounties and the USDC it has paid.' },
+]
+
+const COMPARE: [string, string][] = [
+  ['Prize, deadline and status', 'Listing details such as category and skills'],
+  ['Winners and claims', 'Milestones and review threads'],
+  ['Fees paid to the treasury', 'Team roles and applications'],
+  ['Submission hashes', 'Profile text and notes'],
+]
+
+const FAQ: [string, string][] = [
+  ['Does BountyFi hold my money?', 'No. The prize sits in the contract, which has no owner or admin key. BountyFi cannot move, freeze or redirect it.'],
+  ['What if the creator never picks a winner?', 'After the deadline and a 7 day review period, the creator can take the prize back. Check a creator’s record before you spend time on their bounty.'],
+  ['Can a team win together?', 'The contract pays one wallet per place. A team picks one wallet and agrees the split between themselves, which the team panel records.'],
+  ['What does an admin do?', 'An admin approves a funded bounty before it is listed. Admins cannot change a prize, pick winners or touch the contract.'],
+  ['Is this on mainnet?', 'No. BountyFi runs on Arc Testnet, where USDC has no real value. The contract has not had an independent audit.'],
+  ['Why do I need Google and a wallet?', 'Google proves who you are and the wallet is where money goes. You link them once by signing a free message that sends no transaction.'],
+]
+
+/** Section heading used by every block of the page, so titles share one size, one measure and one spacing. */
+function SectionHead({ id, title, children }: { id: string; title: string; children?: ReactNode }) {
+  return (
+    <div className="space-y-3">
+      <Reveal as="h2" className="page-title">
+        <span id={id}>{title}</span>
+      </Reveal>
+      {children && (
+        <Reveal delay={100} as="p" className="max-w-md text-mute">
+          {children}
+        </Reveal>
+      )}
+    </div>
+  )
+}
+
+/** The icon tile used for every feature row: one size, one outline, one stroke weight. */
+function IconTile({ icon: Icon }: { icon: LucideIcon }) {
+  return (
+    <span className="grid size-10 shrink-0 place-items-center rounded-md border border-ink bg-sky text-ink">
+      <Icon size={20} strokeWidth={1.75} aria-hidden />
+    </span>
+  )
+}
+
+function ArtFrame({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
+  return (
+    <Reveal delay={delay} className="overflow-hidden rounded-lg border border-ink shadow-retro">
+      {children}
+    </Reveal>
+  )
+}
+
 /** The four stages of a bounty. On wide screens the artwork stays in place and changes as each stage scrolls past. */
 function Story() {
   const [active, setActive] = useState(0)
@@ -182,9 +260,7 @@ function Story() {
   return (
     <section aria-labelledby="story" className="grid gap-x-16 gap-y-8 lg:grid-cols-2">
       <div className="lg:col-span-2">
-        <Reveal as="h2" className="page-title max-w-2xl">
-          <span id="story">One prize, four moments.</span>
-        </Reveal>
+        <SectionHead id="story" title="One prize, four moments." />
       </div>
       <ol className="space-y-12 lg:space-y-0">
         {STEPS.map((step, i) => (
@@ -196,7 +272,7 @@ function Story() {
             data-step={i}
             className="lg:flex lg:min-h-[58vh] lg:items-center"
           >
-            <div className="space-y-5">
+            <div className="w-full space-y-5">
               <div className="overflow-hidden rounded-lg border border-ink shadow-retro lg:hidden">{step.scene}</div>
               <Reveal className="grid grid-cols-[3rem_1fr] items-baseline gap-3">
                 <span className="pixel-label pt-1 text-mute">0{i + 1}</span>
@@ -220,7 +296,7 @@ function Story() {
 
 function Hero() {
   return (
-    <section className="grid items-center gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-14">
+    <section className="grid items-center gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-16">
       <div className="space-y-6">
         <Reveal as="h1" className="font-display text-[2.6rem] font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-[4.25rem]">
           Lock the prize. Pay the winners.
@@ -240,9 +316,80 @@ function Hero() {
           0.5% is added when you fund. 5% is taken from each winner's payout. Nothing else.
         </Reveal>
       </div>
-      <Reveal delay={200} className="overflow-hidden rounded-lg border border-ink shadow-retro">
+      <ArtFrame delay={200}>
         <HeroScene />
-      </Reveal>
+      </ArtFrame>
+    </section>
+  )
+}
+
+function AudiencePanel({
+  icon,
+  role,
+  title,
+  points,
+  cta,
+  to,
+  featured = false,
+}: {
+  icon: LucideIcon
+  role: string
+  title: string
+  points: string[]
+  cta: string
+  to: string
+  featured?: boolean
+}) {
+  return (
+    <Reveal className={featured ? 'flex flex-col rounded-lg border border-ink bg-surface p-6 shadow-retro sm:p-8' : 'flex flex-col rounded-lg border border-line bg-surface p-6 sm:p-8'}>
+      <div className="flex items-center gap-3">
+        <IconTile icon={icon} />
+        <span className="pixel-label text-mute">{role.toUpperCase()}</span>
+      </div>
+      <h3 className="mt-5 font-display text-2xl font-semibold leading-snug">{title}</h3>
+      <ul className="mt-5 space-y-3">
+        {points.map((p) => (
+          <li key={p} className="grid grid-cols-[1.25rem_1fr] gap-3 text-sm">
+            <Check size={18} strokeWidth={2.25} aria-hidden className="mt-0.5 text-ink" />
+            <span className="text-ink/90">{p}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-auto pt-8">
+        <ButtonLink to={to} variant={featured ? 'accent' : 'secondary'} size="lg">
+          {cta}
+        </ButtonLink>
+      </div>
+    </Reveal>
+  )
+}
+
+function Faq() {
+  return (
+    <section aria-labelledby="faq" className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
+      <div className="space-y-5">
+        <SectionHead id="faq" title="Questions people ask first.">
+          The full answers are in the docs.
+        </SectionHead>
+        <Reveal delay={150}>
+          <ButtonLink to="/docs#faq" variant="secondary">
+            Read the docs
+          </ButtonLink>
+        </Reveal>
+      </div>
+      <ul className="divide-y divide-line border-y border-line">
+        {FAQ.map(([q, a], i) => (
+          <Reveal as="li" key={q} delay={i * 60}>
+            <details className="group">
+              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-3 font-display font-semibold marker:hidden">
+                {q}
+                <ChevronDown size={18} aria-hidden className="shrink-0 text-mute transition-transform duration-200 group-open:rotate-180" />
+              </summary>
+              <p className="max-w-[60ch] pb-5 text-sm text-mute">{a}</p>
+            </details>
+          </Reveal>
+        ))}
+      </ul>
     </section>
   )
 }
@@ -252,34 +399,80 @@ export default function Landing() {
     <div className="space-y-24 sm:space-y-32">
       <Hero />
       <Totals />
+
+      <section aria-labelledby="who" className="space-y-8">
+        <SectionHead id="who" title="Two ways in." />
+        <div className="grid gap-6 md:grid-cols-2">
+          <AudiencePanel
+            featured
+            icon={Lock}
+            role="For maintainers"
+            title="Fund the work you need done."
+            points={[
+              'Describe the work. Its text is hashed on-chain, so it cannot change.',
+              'Lock the prize and the deadline in the contract.',
+              'Pick the winners yourself. Unused prizes come back to you.',
+            ]}
+            cta="Post a bounty"
+            to="/create"
+          />
+          <AudiencePanel
+            icon={GitPullRequest}
+            role="For contributors"
+            title="Get paid for what you ship."
+            points={[
+              'Every listed bounty already has its prize locked.',
+              'Submit before the deadline. Your entry is recorded on-chain.',
+              'Claim from the contract and keep your share minus 5%.',
+            ]}
+            cta="Browse open bounties"
+            to="/explore"
+          />
+        </div>
+      </section>
+
       <Story />
 
       <OpenNow />
 
       <section aria-labelledby="calc" className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
-        <Reveal className="overflow-hidden rounded-lg border border-ink shadow-retro">
+        <ArtFrame>
           <ReceiptScene />
-        </Reveal>
+        </ArtFrame>
         <div className="space-y-6">
-          <Reveal as="h2" className="page-title">
-            <span id="calc">Know the payout before you post.</span>
-          </Reveal>
-          <Reveal delay={120} as="p" className="max-w-md text-mute">
+          <SectionHead id="calc" title="Know the payout before you post.">
             Every deduction is a fixed rate in the contract, so these numbers are the numbers on-chain. The receipt shows a 100 USDC example.
-          </Reveal>
+          </SectionHead>
           <Reveal delay={200} className="rounded-lg border border-line bg-surface p-5 sm:p-6">
             <PrizeCalculator />
           </Reveal>
         </div>
       </section>
 
+      <section aria-labelledby="checks" className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
+        <div className="lg:sticky lg:top-24 lg:self-start">
+          <SectionHead id="checks" title="Checks you can see.">
+            Rules live in the contract and in the open, so you do not have to take anyone’s word for them.
+          </SectionHead>
+        </div>
+        <ul className="divide-y divide-line border-y border-line">
+          {CHECKS.map((c, i) => (
+            <Reveal as="li" key={c.title} delay={i * 60} className="grid grid-cols-[2.5rem_1fr] gap-4 py-5">
+              <IconTile icon={c.icon} />
+              <div>
+                <h3 className="font-display text-lg font-semibold">{c.title}</h3>
+                <p className="mt-1 max-w-[56ch] text-sm text-mute">{c.body}</p>
+              </div>
+            </Reveal>
+          ))}
+        </ul>
+      </section>
+
       <Categories />
 
       <section aria-labelledby="modules" className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16">
         <div className="space-y-6">
-          <Reveal as="h2" className="page-title">
-            <span id="modules">More than one-off bounties.</span>
-          </Reveal>
+          <SectionHead id="modules" title="More than one-off bounties." />
           <ul className="divide-y divide-line border-y border-line">
             {MODULES.map((m, i) => (
               <Reveal as="li" key={m.title} delay={i * 70}>
@@ -292,29 +485,116 @@ export default function Landing() {
           </ul>
           <p className="text-sm text-mute">Milestones, teams and programs are records. USDC moves only through the escrow.</p>
         </div>
-        <Reveal delay={150} className="overflow-hidden rounded-lg border border-ink shadow-retro">
+        <ArtFrame delay={150}>
           <BoardScene />
+        </ArtFrame>
+      </section>
+
+      <section aria-labelledby="trust" className="space-y-8">
+        <SectionHead id="trust" title="Every fact says where it comes from." />
+        <Reveal className="overflow-hidden rounded-lg border border-line bg-surface">
+          <div className="grid grid-cols-1 divide-y divide-line md:grid-cols-2 md:divide-x md:divide-y-0">
+            <div className="flex items-center gap-3 border-b border-line bg-sky/60 px-5 py-4 md:border-b-0">
+              <FileCheck2 size={20} strokeWidth={1.75} aria-hidden />
+              <h3 className="font-display font-semibold">Verified on-chain</h3>
+            </div>
+            <div className="hidden items-center gap-3 bg-paper px-5 py-4 md:flex">
+              <Database size={20} strokeWidth={1.75} aria-hidden />
+              <h3 className="font-display font-semibold">Recorded on BountyFi</h3>
+            </div>
+          </div>
+          <ul className="divide-y divide-line border-t border-line">
+            {COMPARE.map(([left, right]) => (
+              <li key={left} className="grid md:grid-cols-2 md:divide-x md:divide-line">
+                <span className="flex items-center gap-3 px-5 py-3.5 text-sm">
+                  <Check size={16} strokeWidth={2.25} aria-hidden className="shrink-0" />
+                  {left}
+                </span>
+                <span className="px-5 py-3.5 pl-[3.25rem] text-sm text-mute md:pl-5">
+                  <span className="mb-0.5 block text-xs font-medium md:hidden">Recorded on BountyFi</span>
+                  {right}
+                </span>
+              </li>
+            ))}
+          </ul>
         </Reveal>
+        <p className="max-w-xl text-sm text-mute">Numbers from the contract are marked verified. Everything else is labelled as recorded, never shown as if it were on-chain.</p>
+      </section>
+
+      <section aria-labelledby="where" className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
+        <Reveal className="rounded-lg border border-ink bg-surface shadow-retro">
+          <div className="flex items-center justify-between border-b border-ink px-5 py-3">
+            <span className="pixel-label text-mute">ISSUE COMMENT</span>
+            <span className="num text-xs text-mute">maintainer</span>
+          </div>
+          <p className="num px-5 pt-5 text-lg font-medium">/bounty 200 react</p>
+          <div className="m-5 rounded-md border border-line bg-sky/50 p-4 text-sm">
+            <p>
+              A <strong>200 USDC</strong> bounty for this issue is ready to post on BountyFi:
+            </p>
+            <p className="mt-2 font-medium underline underline-offset-4">Open the pre-filled form</p>
+            <p className="mt-3 text-xs text-mute">Nothing has been created yet. You lock the prize from your own wallet.</p>
+          </div>
+        </Reveal>
+        <div className="space-y-6">
+          <SectionHead id="where" title="Start inside GitHub.">
+            Comment on a GitHub issue and the bounty form opens filled in.
+          </SectionHead>
+          <ul className="divide-y divide-line border-y border-line">
+            {[
+              { icon: Terminal, title: 'GitHub command', body: 'Maintainers with write access can use it. It never creates a bounty on its own.' },
+              { icon: Webhook, title: 'Chat webhooks', body: 'Discord, Slack and Telegram, sent after the indexer confirms an event.' },
+              { icon: Braces, title: 'Public API', body: 'Read-only endpoints for bounties, projects, profiles and totals.' },
+            ].map((r, i) => (
+              <Reveal as="li" key={r.title} delay={i * 70} className="grid grid-cols-[2.5rem_1fr] gap-4 py-4">
+                <IconTile icon={r.icon} />
+                <div>
+                  <h3 className="font-display font-semibold">{r.title}</h3>
+                  <p className="mt-0.5 text-sm text-mute">{r.body}</p>
+                </div>
+              </Reveal>
+            ))}
+          </ul>
+          <Reveal>
+            <ButtonLink to="/developers" variant="secondary">
+              Open the developer page
+            </ButtonLink>
+          </Reveal>
+        </div>
       </section>
 
       <section aria-labelledby="arc" className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
-        <Reveal className="overflow-hidden rounded-lg border border-ink shadow-retro">
+        <ArtFrame>
           <FinalityScene />
-        </Reveal>
-        <div className="space-y-5">
-          <Reveal as="h2" className="page-title">
-            <span id="arc">Built on Arc.</span>
-          </Reveal>
-          <Reveal delay={120} as="p" className="max-w-md text-mute">
-            Arc Network finalizes transactions in under a second and takes gas in USDC, so a funding or a claim is one transaction you can read on the explorer. BountyFi runs on Arc Testnet today.
-          </Reveal>
-          <Reveal delay={200} className="flex flex-wrap gap-3">
+        </ArtFrame>
+        <div className="space-y-6">
+          <SectionHead id="arc" title="Built on Arc.">
+            BountyFi runs on Arc Testnet today. Arc Network is the infrastructure underneath, and BountyFi is its own product.
+          </SectionHead>
+          <ul className="divide-y divide-line border-y border-line">
+            {[
+              { icon: Coins, title: 'Gas is USDC', body: 'One token pays for funding, submitting and claiming.' },
+              { icon: Timer, title: 'Final in under a second', body: 'Arc finality is deterministic, so a confirmed claim is settled.' },
+              { icon: ScanSearch, title: 'Every step on the explorer', body: 'Each funding, pick and claim is a transaction you can open.' },
+            ].map((r, i) => (
+              <Reveal as="li" key={r.title} delay={i * 70} className="grid grid-cols-[2.5rem_1fr] gap-4 py-4">
+                <IconTile icon={r.icon} />
+                <div>
+                  <h3 className="font-display font-semibold">{r.title}</h3>
+                  <p className="mt-0.5 text-sm text-mute">{r.body}</p>
+                </div>
+              </Reveal>
+            ))}
+          </ul>
+          <Reveal>
             <ButtonLink to="/docs#arc" variant="secondary">
               Read how BountyFi uses Arc
             </ButtonLink>
           </Reveal>
         </div>
       </section>
+
+      <Faq />
 
       <Reveal as="section" className="on-ink flex flex-col items-start justify-between gap-6 rounded-lg border border-ink bg-ink p-8 text-white sm:flex-row sm:items-center sm:p-10">
         <h2 className="max-w-md font-display text-3xl font-semibold leading-tight sm:text-4xl">Fund the first bounty, or claim the first prize.</h2>

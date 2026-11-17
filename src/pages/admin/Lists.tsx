@@ -266,8 +266,8 @@ export function System() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <section className="rounded-md border border-line bg-white p-5">
-        <h2 className="mb-2 font-display text-xl font-semibold">Chain indexer</h2>
+      <section className="rounded-lg border border-line bg-surface p-5 shadow-card">
+        <h2 className="mb-3 font-display text-base font-semibold">Chain indexer</h2>
         <dl>
           <Row label="Status">
             {!s.indexer.running ? <Badge tone="danger">Not running</Badge> : s.indexer.holdsLock ? <Badge tone="ok">Running</Badge> : <Badge tone="warn">Standby</Badge>}
@@ -280,8 +280,8 @@ export function System() {
         {s.indexer.lastError && <Callout tone="danger" className="mt-3" title="Last error">{s.indexer.lastError}</Callout>}
       </section>
 
-      <section className="rounded-md border border-line bg-white p-5">
-        <h2 className="mb-2 font-display text-xl font-semibold">Services</h2>
+      <section className="rounded-lg border border-line bg-surface p-5 shadow-card">
+        <h2 className="mb-3 font-display text-base font-semibold">Services</h2>
         <dl>
           <Row label="Database latency"><span className="num">{s.database.latencyMs} ms</span></Row>
           <Row label="Connections"><span className="num">{s.database.poolTotal} open, {s.database.poolIdle} idle, {s.database.poolWaiting} waiting</span></Row>
@@ -290,8 +290,8 @@ export function System() {
         </dl>
       </section>
 
-      <section className="rounded-md border border-line bg-white p-5 lg:col-span-2">
-        <h2 className="mb-2 font-display text-xl font-semibold">Addresses and access</h2>
+      <section className="rounded-lg border border-line bg-surface p-5 shadow-card lg:col-span-2">
+        <h2 className="mb-3 font-display text-base font-semibold">Addresses and access</h2>
         <dl>
           <Row label="Bounty contract">{s.contract ? <AddressChip address={s.contract} /> : 'Not configured'}</Row>
           <Row label="USDC token"><AddressChip address={s.usdc} /></Row>
