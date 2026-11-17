@@ -55,6 +55,8 @@ function AuthNotice() {
   )
 }
 
+const WORKSPACE_PREFIXES = ['/dashboard', '/workspace', '/submissions', '/rewards', '/notifications', '/settings', '/disputes']
+
 const FALLBACK = (
   <div className="grid place-items-center py-24">
     <Spinner size={28} />
@@ -63,8 +65,18 @@ const FALLBACK = (
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation()
-  // The admin console is its own full-page application with its own navigation, so the public frame stays out of it.
+  // The admin console and the user workspace are full-page applications with their own navigation, so the public
+  // header, footer and bottom bar stay out of them. The workspace still needs the wallet and setup dialogs.
   if (pathname === '/admin' || pathname.startsWith('/admin/')) return <Suspense fallback={FALLBACK}>{children}</Suspense>
+  if (WORKSPACE_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+    return (
+      <>
+        <Suspense fallback={FALLBACK}>{children}</Suspense>
+        <IdentityGuide />
+        <WalletDialog />
+      </>
+    )
+  }
   return (
     <div className="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
       <a

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Compass } from 'lucide-react'
+import { BadgeCheck, ClipboardCheck, Coins, Compass, GitPullRequest } from 'lucide-react'
 import { RequireIdentity } from '@/components/layout/RequireIdentity'
 import { BountyRow, BountyRowSkeleton } from '@/components/bounty/BountyRow'
 import { ActivityList } from '@/components/ecosystem/ActivityList'
@@ -28,10 +28,10 @@ function Content() {
   return (
     <div className="space-y-8">
       <StatGrid>
-        <Stat label="Active contributions" value={c.active} hint={c.pendingReview > 0 ? `${c.pendingReview} waiting for review` : 'Nothing waiting'} />
-        <Stat label="Pending reviews" value={c.pendingReview} />
-        <Stat label="Completed bounties" value={c.completed} hint={c.won > c.completed ? `${c.won} won in total` : undefined} />
-        <Stat label="Earned after fees" value={formatUsdc(c.earned, 4)} unit="USDC" />
+        <Stat icon={GitPullRequest} label="Active contributions" value={c.active} hint={c.pendingReview > 0 ? `${c.pendingReview} waiting for review` : 'Nothing waiting'} />
+        <Stat icon={ClipboardCheck} label="Pending reviews" value={c.pendingReview} />
+        <Stat icon={BadgeCheck} label="Completed bounties" value={c.completed} hint={c.won > c.completed ? `${c.won} won in total` : undefined} />
+        <Stat icon={Coins} label="Earned after fees" value={formatUsdc(c.earned, 4)} unit="USDC" />
       </StatGrid>
 
       {c.changesRequested > 0 && (

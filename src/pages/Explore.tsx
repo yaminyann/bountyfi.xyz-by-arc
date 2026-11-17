@@ -1,17 +1,19 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Plus, Search, SlidersHorizontal, X } from 'lucide-react'
+import { LayoutGrid, List, Search, SlidersHorizontal, X } from 'lucide-react'
+import { BountyCard, BountyCardSkeleton } from '@/components/bounty/BountyCard'
 import { BountyRow, BountyRowSkeleton } from '@/components/bounty/BountyRow'
 import { SaveSearchButton } from '@/components/ecosystem/SaveSearch'
 import { Button, ButtonLink } from '@/components/ui/Button'
-import { EmptyState, ErrorState, PageHeader } from '@/components/ui/Feedback'
+import { EmptyState, ErrorState } from '@/components/ui/Feedback'
 import { Input, Select } from '@/components/ui/Form'
 import { Pagination } from '@/components/ui/Pagination'
 import { useBounties, type BountyFilters } from '@/lib/api/queries'
 import { useCategories } from '@/lib/api/ecosystem'
 import { cn } from '@/lib/cn'
+import { categoryIcon } from '@/lib/nav'
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = 12
 
 type State = 'open' | 'in_progress' | 'completed' | 'cancelled' | 'all'
 
@@ -37,31 +39,17 @@ const DEADLINES = [
   { value: '30', label: 'Within a month' },
 ]
 
-function FilterGroup({ label, children }: { label: string; children: ReactNode }) {
+function Labelled({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <fieldset className="space-y-2">
-      <legend className="mb-1.5 text-xs font-medium text-mute">{label}</legend>
+    <div className="space-y-1.5">
+      <p className="text-xs font-medium text-mute">{label}</p>
       {children}
-    </fieldset>
+    </div>
   )
 }
 
-function Choice({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={active}
-      onClick={onClick}
-      className={cn(
-        'flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-sm transition-colors',
-        active ? 'bg-ink text-white' : 'text-ink hover:bg-ink/5',
-      )}
-    >
-      {children}
-    </button>
-  )
-}
+const RAIL_ITEM =
+  'inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-md border px-3.5 text-sm font-medium transition-colors'
 
 export default function Explore() {
   const [params, setParams] = useSearchParams()
@@ -79,6 +67,7 @@ export default function Explore() {
   const maxReward = params.get('max') ?? ''
   const offset = Math.max(Number(params.get('offset')) || 0, 0)
   const urlSearch = params.get('q') ?? ''
+  const view = params.get('view') === 'list' ? 'list' : 'grid'
 
   const [text, setText] = useState(urlSearch)
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -133,120 +122,45 @@ export default function Explore() {
     (minReward || maxReward) && { key: 'reward', label: `${minReward || '0'} to ${maxReward || 'any'} USDC` },
   ].filter(Boolean) as { key: string; label: string }[]
 
+  // Category is chosen in the rail, so the panel counts only the other filters.
+  const panelCount = activeFilters.filter((f) => f.key !== 'category').length
+
   const clearOne = (key: string) => (key === 'reward' ? update({ min: undefined, max: undefined }) : update({ [key]: undefined }))
   const clearAll = () => setParams({}, { replace: true })
 
-  const filterPanel = (
-    <div className="space-y-6">
-      <FilterGroup label="Status">
-        <div role="radiogroup" aria-label="Bounty status" className="space-y-0.5">
-          {STATES.map((s) => (
-            <Choice key={s.value} active={state === s.value} onClick={() => update({ state: s.value === 'open' ? undefined : s.value })}>
-              {s.label}
-            </Choice>
-          ))}
-        </div>
-      </FilterGroup>
-
-      <FilterGroup label="Category">
-        <Select aria-label="Category" value={category} onChange={(e) => update({ category: e.target.value })}>
-          <option value="">All categories</option>
-          {categories.data?.map((c) => (
-            <option key={c.slug} value={c.slug}>
-              {c.name}
-            </option>
-          ))}
-        </Select>
-      </FilterGroup>
-
-      <FilterGroup label="Difficulty">
-        <Select aria-label="Difficulty" value={difficulty} onChange={(e) => update({ difficulty: e.target.value })}>
-          <option value="">Any difficulty</option>
-          <option value="beginner">Beginner</option>
-          <option value="intermediate">Intermediate</option>
-          <option value="advanced">Advanced</option>
-        </Select>
-      </FilterGroup>
-
-      <FilterGroup label="Work type">
-        <Select aria-label="Work type" value={mode ?? ''} onChange={(e) => update({ mode: e.target.value })}>
-          <option value="">Solo and team</option>
-          <option value="solo">Solo only</option>
-          <option value="team">Team only</option>
-        </Select>
-      </FilterGroup>
-
-      <FilterGroup label="Prize in USDC">
-        <div className="grid grid-cols-2 gap-2">
-          <Input aria-label="Minimum prize" inputMode="numeric" placeholder="Min" defaultValue={minReward} key={`min-${minReward}`} onBlur={(e) => update({ min: e.target.value.replace(/\D/g, '') })} />
-          <Input aria-label="Maximum prize" inputMode="numeric" placeholder="Max" defaultValue={maxReward} key={`max-${maxReward}`} onBlur={(e) => update({ max: e.target.value.replace(/\D/g, '') })} />
-        </div>
-      </FilterGroup>
-
-      <FilterGroup label="Deadline">
-        <Select aria-label="Deadline" value={within} onChange={(e) => update({ within: e.target.value })}>
-          {DEADLINES.map((d) => (
-            <option key={d.value} value={d.value}>
-              {d.label}
-            </option>
-          ))}
-        </Select>
-      </FilterGroup>
-
-      <FilterGroup label="Skill">
-        <Input
-          aria-label="Skill"
-          placeholder="react, solidity, design"
-          defaultValue={skill}
-          key={`skill-${skill}`}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') update({ skill: e.currentTarget.value.trim().toLowerCase() })
-          }}
-          onBlur={(e) => update({ skill: e.target.value.trim().toLowerCase() })}
-        />
-      </FilterGroup>
-    </div>
-  )
-
   return (
-    <div>
-      <PageHeader
-        title="Explore bounties"
-        actions={
-          <ButtonLink to="/create" variant="accent" icon={<Plus size={15} aria-hidden />}>
-            Post a bounty
-          </ButtonLink>
-        }
-      >
-        Every bounty has its prize locked in the contract and has been reviewed by an admin.
-      </PageHeader>
+    <div className="space-y-8">
+      <header className="space-y-6">
+        <div className="max-w-2xl space-y-3">
+          <h1 className="page-title text-4xl sm:text-5xl">Explore bounties</h1>
+          <p className="text-mute">Every bounty has its prize locked in the contract and has been reviewed by an admin.</p>
+        </div>
 
-      <div className="grid gap-8 lg:grid-cols-[13rem_minmax(0,1fr)]">
-        <aside className="hidden lg:block" aria-label="Filters">
-          <div className="sticky top-20">{filterPanel}</div>
-        </aside>
-
-        <div className="min-w-0 space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative min-w-[14rem] flex-1">
-              <label htmlFor="bounty-search" className="sr-only">
-                Search bounties
-              </label>
-              <Search size={16} aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-mute" />
-              <Input id="bounty-search" type="search" placeholder="Search by title, project or skill" value={text} onChange={(e) => setText(e.target.value)} className="pl-9" />
-            </div>
-            <div className="w-44">
-              <label htmlFor="bounty-sort" className="sr-only">
-                Sort by
-              </label>
-              <Select id="bounty-sort" value={sort} onChange={(e) => update({ sort: e.target.value === 'newest' ? undefined : e.target.value })}>
-                {SORTS.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <label htmlFor="bounty-search" className="sr-only">
+              Search bounties
+            </label>
+            <Search size={18} aria-hidden className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-mute" />
+            <Input
+              id="bounty-search"
+              type="search"
+              placeholder="Search by title, project or skill"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              className="h-12 rounded-lg border-ink/40 pl-11 text-base shadow-card"
+            />
+          </div>
+          <div className="flex gap-3">
+            <Button
+              className="h-12 flex-1 sm:flex-none"
+              icon={<SlidersHorizontal size={16} aria-hidden />}
+              onClick={() => setFiltersOpen((v) => !v)}
+              aria-expanded={filtersOpen}
+              aria-controls="filter-panel"
+            >
+              Filters{panelCount > 0 ? ` (${panelCount})` : ''}
+            </Button>
             <SaveSearchButton
               filters={{
                 q: urlSearch || undefined,
@@ -259,83 +173,230 @@ export default function Explore() {
                 max: maxReward ? Number(maxReward) : undefined,
               }}
             />
-            <Button className="lg:hidden" icon={<SlidersHorizontal size={15} aria-hidden />} onClick={() => setFiltersOpen((v) => !v)} aria-expanded={filtersOpen}>
-              Filters{activeFilters.length > 0 ? ` (${activeFilters.length})` : ''}
-            </Button>
+          </div>
+        </div>
+
+        {filtersOpen && (
+          <div id="filter-panel" className="grid gap-5 rounded-lg border border-ink bg-surface p-5 shadow-retro-sm sm:grid-cols-2 lg:grid-cols-3">
+            <Labelled label="Difficulty">
+              <Select aria-label="Difficulty" value={difficulty} onChange={(e) => update({ difficulty: e.target.value })}>
+                <option value="">Any difficulty</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </Select>
+            </Labelled>
+            <Labelled label="Work type">
+              <Select aria-label="Work type" value={mode ?? ''} onChange={(e) => update({ mode: e.target.value })}>
+                <option value="">Solo and team</option>
+                <option value="solo">Solo only</option>
+                <option value="team">Team only</option>
+              </Select>
+            </Labelled>
+            <Labelled label="Deadline">
+              <Select aria-label="Deadline" value={within} onChange={(e) => update({ within: e.target.value })}>
+                {DEADLINES.map((d) => (
+                  <option key={d.value} value={d.value}>
+                    {d.label}
+                  </option>
+                ))}
+              </Select>
+            </Labelled>
+            <Labelled label="Prize in USDC">
+              <div className="grid grid-cols-2 gap-2">
+                <Input aria-label="Minimum prize" inputMode="numeric" placeholder="Min" defaultValue={minReward} key={`min-${minReward}`} onBlur={(e) => update({ min: e.target.value.replace(/\D/g, '') })} />
+                <Input aria-label="Maximum prize" inputMode="numeric" placeholder="Max" defaultValue={maxReward} key={`max-${maxReward}`} onBlur={(e) => update({ max: e.target.value.replace(/\D/g, '') })} />
+              </div>
+            </Labelled>
+            <Labelled label="Skill">
+              <Input
+                aria-label="Skill"
+                placeholder="react, solidity, design"
+                defaultValue={skill}
+                key={`skill-${skill}`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') update({ skill: e.currentTarget.value.trim().toLowerCase() })
+                }}
+                onBlur={(e) => update({ skill: e.target.value.trim().toLowerCase() })}
+              />
+            </Labelled>
+            <div className="flex items-end">
+              <Button variant="ghost" onClick={clearAll} disabled={activeFilters.length === 0 && state === 'open' && !urlSearch}>
+                Clear everything
+              </Button>
+            </div>
+          </div>
+        )}
+      </header>
+
+      <section aria-label="Categories" className="no-scrollbar -mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+        <div role="radiogroup" aria-label="Category" className="flex gap-2">
+          <button
+            type="button"
+            role="radio"
+            aria-checked={category === ''}
+            onClick={() => update({ category: undefined })}
+            className={cn(RAIL_ITEM, category === '' ? 'border-ink bg-ink text-white' : 'border-line bg-surface text-ink hover:border-ink/40')}
+          >
+            All work
+          </button>
+          {categories.data?.map((c) => {
+            const Icon = categoryIcon(c.icon)
+            const active = category === c.slug
+            return (
+              <button
+                key={c.slug}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => update({ category: active ? undefined : c.slug })}
+                className={cn(RAIL_ITEM, active ? 'border-ink bg-ink text-white' : 'border-line bg-surface text-ink hover:border-ink/40')}
+              >
+                <Icon size={16} strokeWidth={1.75} aria-hidden />
+                {c.name}
+              </button>
+            )
+          })}
+        </div>
+      </section>
+
+      <section aria-label="Results" className="space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/15 pb-4">
+          <div role="radiogroup" aria-label="Bounty status" className="no-scrollbar -mx-1 flex max-w-full gap-1 overflow-x-auto px-1">
+            {STATES.map((s) => (
+              <button
+                key={s.value}
+                type="button"
+                role="radio"
+                aria-checked={state === s.value}
+                onClick={() => update({ state: s.value === 'open' ? undefined : s.value })}
+                className={cn(
+                  'min-h-10 shrink-0 whitespace-nowrap rounded-md px-3.5 text-sm font-medium transition-colors',
+                  state === s.value ? 'bg-ink text-white' : 'text-mute hover:bg-ink/5 hover:text-ink',
+                )}
+              >
+                {s.label}
+              </button>
+            ))}
           </div>
 
-          {filtersOpen && <div className="rounded-lg border border-line bg-surface p-4 lg:hidden">{filterPanel}</div>}
-
-          {activeFilters.length > 0 && (
-            <ul className="flex flex-wrap items-center gap-2" aria-label="Active filters">
-              {activeFilters.map((f) => (
-                <li key={f.key}>
-                  <button
-                    type="button"
-                    onClick={() => clearOne(f.key)}
-                    className="inline-flex items-center gap-1 rounded-full border border-line bg-surface py-1 pl-2.5 pr-1.5 text-xs font-medium hover:border-ink/30"
-                  >
-                    {f.label}
-                    <X size={12} aria-label="Remove filter" />
-                  </button>
-                </li>
+          <div className="flex items-center gap-3">
+            <p className="num hidden text-sm text-mute sm:block" aria-live="polite">
+              {query.isSuccess && `${total} ${total === 1 ? 'bounty' : 'bounties'}${urlSearch ? ` for “${urlSearch}”` : ''}`}
+            </p>
+            <div className="w-44">
+              <label htmlFor="bounty-sort" className="sr-only">
+                Sort by
+              </label>
+              <Select id="bounty-sort" value={sort} onChange={(e) => update({ sort: e.target.value === 'newest' ? undefined : e.target.value })}>
+                {SORTS.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div role="group" aria-label="Layout" className="hidden rounded-md border border-line bg-surface p-0.5 sm:flex">
+              {(
+                [
+                  ['grid', LayoutGrid, 'Grid'],
+                  ['list', List, 'List'],
+                ] as const
+              ).map(([value, Icon, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={view === value}
+                  aria-label={`${label} layout`}
+                  onClick={() => update({ view: value === 'grid' ? undefined : value })}
+                  className={cn('grid size-9 place-items-center rounded transition-colors', view === value ? 'bg-ink text-white' : 'text-mute hover:text-ink')}
+                >
+                  <Icon size={16} aria-hidden />
+                </button>
               ))}
-              <li>
-                <button type="button" onClick={clearAll} className="text-xs font-medium text-mute underline underline-offset-2 hover:text-ink">
-                  Clear all
+            </div>
+          </div>
+        </div>
+
+        {activeFilters.length > 0 && (
+          <ul className="flex flex-wrap items-center gap-2" aria-label="Active filters">
+            {activeFilters.map((f) => (
+              <li key={f.key}>
+                <button
+                  type="button"
+                  onClick={() => clearOne(f.key)}
+                  className="inline-flex min-h-8 items-center gap-1.5 rounded-md border border-ink bg-sky py-1 pl-2.5 pr-2 text-xs font-medium hover:bg-sky-deep"
+                >
+                  {f.label}
+                  <X size={12} aria-label="Remove filter" />
                 </button>
               </li>
+            ))}
+            <li>
+              <button type="button" onClick={clearAll} className="text-xs font-medium text-mute underline underline-offset-2 hover:text-ink">
+                Clear all
+              </button>
+            </li>
+          </ul>
+        )}
+
+        {query.isError ? (
+          <ErrorState title="Bounties did not load" message="The server could not be reached." onRetry={() => void query.refetch()} />
+        ) : query.isPending ? (
+          view === 'grid' ? (
+            <ul aria-busy className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }, (_, i) => (
+                <BountyCardSkeleton key={i} />
+              ))}
             </ul>
-          )}
-
-          <p className="min-h-5 text-sm text-mute" aria-live="polite">
-            {query.isSuccess && `${total} ${total === 1 ? 'bounty' : 'bounties'}${urlSearch ? ` matching “${urlSearch}”` : ''}`}
-          </p>
-
-          {query.isError ? (
-            <ErrorState title="Bounties did not load" message="The server could not be reached." onRetry={() => void query.refetch()} />
-          ) : query.isPending ? (
+          ) : (
             <ul aria-busy className="overflow-hidden rounded-lg border border-line">
               {Array.from({ length: 4 }, (_, i) => (
                 <BountyRowSkeleton key={i} />
               ))}
             </ul>
-          ) : items.length === 0 ? (
-            <EmptyState
-              icon={Search}
-              title={urlSearch || activeFilters.length > 0 ? 'Nothing matches these filters' : 'No bounties here yet'}
-              action={
-                urlSearch || activeFilters.length > 0 || state !== 'open' ? (
-                  <Button onClick={clearAll}>Clear search and filters</Button>
-                ) : (
-                  <ButtonLink to="/create" variant="primary">
-                    Post a bounty
-                  </ButtonLink>
-                )
-              }
-            >
-              {urlSearch || activeFilters.length > 0 ? 'Try fewer filters, or search for a skill such as react or rust.' : 'Bounties show up here after an admin approves them.'}
-            </EmptyState>
-          ) : (
-            <ul className={cn('overflow-hidden rounded-lg border border-line bg-surface transition-opacity', query.isPlaceholderData && 'opacity-60')}>
-              {items.map((b) => (
-                <BountyRow key={b.id} bounty={b} />
-              ))}
-            </ul>
-          )}
+          )
+        ) : items.length === 0 ? (
+          <EmptyState
+            icon={Search}
+            title={urlSearch || activeFilters.length > 0 ? 'Nothing matches these filters' : 'No bounties here yet'}
+            action={
+              urlSearch || activeFilters.length > 0 || state !== 'open' ? (
+                <Button onClick={clearAll}>Clear search and filters</Button>
+              ) : (
+                <ButtonLink to="/create" variant="primary">
+                  Post the first bounty
+                </ButtonLink>
+              )
+            }
+          >
+            {urlSearch || activeFilters.length > 0 ? 'Try fewer filters, or search for a skill such as react or rust.' : 'Bounties show up here after an admin approves them.'}
+          </EmptyState>
+        ) : view === 'grid' ? (
+          <ul className={cn('grid gap-5 transition-opacity md:grid-cols-2 lg:grid-cols-3', query.isPlaceholderData && 'opacity-60')}>
+            {items.map((b) => (
+              <BountyCard key={b.id} bounty={b} />
+            ))}
+          </ul>
+        ) : (
+          <ul className={cn('overflow-hidden rounded-lg border border-line bg-surface transition-opacity', query.isPlaceholderData && 'opacity-60')}>
+            {items.map((b) => (
+              <BountyRow key={b.id} bounty={b} />
+            ))}
+          </ul>
+        )}
 
-          <Pagination
-            className="pt-2"
-            total={total}
-            limit={PAGE_SIZE}
-            offset={offset}
-            onChange={(o) => {
-              update({ offset: o ? String(o) : undefined })
-              window.scrollTo({ top: 0 })
-            }}
-          />
-        </div>
-      </div>
+        <Pagination
+          className="pt-2"
+          total={total}
+          limit={PAGE_SIZE}
+          offset={offset}
+          onChange={(o) => {
+            update({ offset: o ? String(o) : undefined })
+            window.scrollTo({ top: 0 })
+          }}
+        />
+      </section>
     </div>
   )
 }

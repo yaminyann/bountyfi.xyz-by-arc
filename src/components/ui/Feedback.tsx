@@ -216,15 +216,24 @@ export function Section({
 }
 
 /** One number with its label. Used in dashboard strips; the parent supplies the grid and dividers. */
-export function Stat({ label, value, unit, hint, tone }: { label: string; value: ReactNode; unit?: string; hint?: ReactNode; tone?: 'warn' }) {
+export function Stat({ label, value, unit, hint, tone, icon: Icon }: { label: string; value: ReactNode; unit?: string; hint?: ReactNode; tone?: 'warn'; icon?: ComponentType<LucideProps> }) {
   return (
-    <div className="bg-surface px-4 py-3.5">
-      <p className="text-xs text-mute">{label}</p>
-      <p className={cn('num mt-1 font-display text-2xl font-semibold leading-none', tone === 'warn' && 'text-warn')}>
-        {value}
-        {unit && <span className="ml-1 text-sm font-normal text-mute">{unit}</span>}
-      </p>
-      {hint && <p className="mt-1.5 text-xs text-mute">{hint}</p>}
+    <div className={cn('flex flex-col justify-between gap-4 rounded-lg border bg-surface p-5 shadow-card', tone === 'warn' ? 'border-warn/50' : 'border-line')}>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-sm font-medium text-mute">{label}</p>
+        {Icon && (
+          <span className={cn('grid size-9 shrink-0 place-items-center rounded-md border border-ink', tone === 'warn' ? 'bg-signal' : 'bg-sky')}>
+            <Icon size={18} strokeWidth={1.75} aria-hidden />
+          </span>
+        )}
+      </div>
+      <div>
+        <p className={cn('num font-display text-3xl font-semibold leading-none', tone === 'warn' && 'text-warn')}>
+          {value}
+          {unit && <span className="ml-1.5 text-sm font-medium text-mute">{unit}</span>}
+        </p>
+        {hint && <p className="mt-2 text-xs text-mute">{hint}</p>}
+      </div>
     </div>
   )
 }
@@ -233,10 +242,10 @@ export function StatGrid({ children, columns = 4 }: { children: ReactNode; colum
   return (
     <div
       className={cn(
-        'grid gap-px overflow-hidden rounded-lg border border-line bg-line',
-        columns === 2 && 'grid-cols-2',
-        columns === 3 && 'grid-cols-2 md:grid-cols-3',
-        columns === 4 && 'grid-cols-2 md:grid-cols-4',
+        'grid gap-4',
+        columns === 2 && 'grid-cols-1 sm:grid-cols-2',
+        columns === 3 && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+        columns === 4 && 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4',
       )}
     >
       {children}

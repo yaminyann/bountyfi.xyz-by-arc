@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { Bell, ChevronDown, Menu, Plus, X } from 'lucide-react'
+import { Bell, ChevronDown, Menu, X } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useIdentity } from '@/contexts/IdentityContext'
 import { AccountPanel } from '@/components/layout/AccountPanel'
 import { SidebarNav } from '@/components/layout/Sidebar'
 import { Avatar } from '@/components/ui/Address'
-import { Button, ButtonLink } from '@/components/ui/Button'
+import { Button } from '@/components/ui/Button'
 import { useUnreadCount } from '@/lib/api/ecosystem'
 import { cn } from '@/lib/cn'
 import { shortAddress } from '@/lib/money'
@@ -141,7 +141,7 @@ export function Header() {
         <div className="flex items-center gap-6">
           <Logo />
           <nav aria-label="Main" className="hidden items-center gap-0.5 xl:flex">
-            {DISCOVER_NAV.map((item) => (
+            {DISCOVER_NAV.filter((item) => item.to !== '/categories').map((item) => (
               <NavLink key={item.to} to={item.to} end={item.end} className={({ isActive }) => cn(TOP_LINK, isActive && 'bg-ink/5 text-ink')}>
                 {item.label.replace('Explore bounties', 'Explore')}
               </NavLink>
@@ -160,9 +160,6 @@ export function Header() {
         <div className="flex items-center gap-1.5">
           <PhoneConnect />
           <NotificationsLink />
-          <ButtonLink to="/create" size="sm" variant="accent" icon={<Plus size={15} aria-hidden />} className="hidden sm:inline-flex">
-            Post a bounty
-          </ButtonLink>
           <div className="hidden sm:block">
             <AccountMenu />
           </div>
@@ -182,9 +179,6 @@ export function Header() {
       {drawer && (
         <div id="mobile-menu" className="hidden max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-line bg-surface px-4 pb-6 pt-3 lg:block xl:hidden">
           <div className="mb-4 flex flex-wrap items-center gap-2 sm:hidden">
-            <ButtonLink to="/create" size="sm" variant="accent" icon={<Plus size={15} aria-hidden />}>
-              Post a bounty
-            </ButtonLink>
             <AccountMenu />
           </div>
           <SidebarNav signedIn={Boolean(user)} onNavigate={() => setDrawer(false)} />

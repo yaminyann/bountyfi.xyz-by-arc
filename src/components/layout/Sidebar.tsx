@@ -1,6 +1,10 @@
 import type { ReactNode } from 'react'
-import { BookOpen } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { BookOpen, Bell, Compass, Home, LogOut, PlusCircle } from 'lucide-react'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { ConsoleShell, type ConsoleGroup } from '@/components/layout/ConsoleShell'
+import { Avatar } from '@/components/ui/Address'
+import { Button } from '@/components/ui/Button'
+import { shortAddress } from '@/lib/money'
 import { useAuth } from '@/contexts/AuthContext'
 import { useIdentity } from '@/contexts/IdentityContext'
 import { useUnreadCount, useWorkspace } from '@/lib/api/ecosystem'
@@ -94,21 +98,100 @@ export function SidebarNav({ signedIn, onNavigate, includeDiscover = true }: { s
   )
 }
 
-/** Layout route for every signed-in page: sidebar on large screens, content beside it. Small screens use the header menu. */
+/** Layout route for every signed-in page: the user's workspace as a full-page application, like the admin console. */
 export function WorkspaceLayout() {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
+  const id = useIdentity()
+  const { pathname } = useLocation()
+  const workspace = useWorkspace(id.status === 'ready')
+  const unread = useUnreadCount(Boolean(user))
+
+  const toReview = (workspace.data?.owner.submissionsToReview ?? 0) + (workspace.data?.owner.milestonesToReview ?? 0)
+  const changes = workspace.data?.contributor.changesRequested ?? 0
+  const profile = profileNav(id.linkedWallet)
+
+  const groups: ConsoleGroup[] = [
+    {
+      title: 'Workspace',
+      items: WORKSPACE_NAV.map((item) => ({
+        ...item,
+        count: item.to === '/dashboard/owner' ? toReview : item.to === '/workspace/contributions' ? changes : undefined,
+      })),
+    },
+    {
+      title: 'Activity',
+      items: ACTIVITY_NAV.map((item) => ({ ...item, count: item.to === '/notifications' ? unread.data : item.to === '/submissions' ? toReview : undefined })),
+    },
+    { title: 'Profile', items: [...(profile ? [profile] : []), SETTINGS_NAV] },
+    { title: 'Bounties', items: [DISCOVER_NAV[0], { to: '/create', label: 'Post a bounty', icon: PlusCircle }] },
+  ]
+
+  const all = groups.flatMap((g) => g.items)
+  const current = [...all].sort((a, b) => b.to.length - a.to.length).find((i) => pathname === i.to || pathname.startsWith(`${i.to}/`))
+  const needsSetup = Boolean(user) && id.status !== 'ready' && id.status !== 'loading'
+
   return (
-    <div className="grid gap-8 lg:grid-cols-[13.5rem_minmax(0,1fr)]">
-      {user && (
-        <aside className="hidden lg:block">
-          <div className="sticky top-20">
-            <SidebarNav signedIn includeDiscover={false} />
+    <ConsoleShell
+      product="Workspace"
+      home="/dashboard"
+      root="Workspace"
+      crumb={current?.label ?? 'Workspace'}
+      groups={groups}
+      sidebarFooter={
+        user ? (
+          <>
+            <div className="flex items-center gap-3 rounded-md px-2 py-2">
+              <Avatar name={user.displayName ?? user.email ?? id.address} src={user.photoURL} size={32} />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-white">{user.displayName ?? user.email}</p>
+                <p className="num truncate text-xs text-white/60">{id.linkedWallet ? shortAddress(id.linkedWallet) : 'No wallet linked'}</p>
+              </div>
+            </div>
+            {needsSetup && (
+              <Link to="/settings" className="mx-1 mb-1 mt-1 flex min-h-10 items-center justify-center rounded-md bg-signal px-3 text-sm font-semibold text-ink">
+                Finish setup
+              </Link>
+            )}
+            <Link to="/" className="mt-1 flex min-h-10 items-center gap-3 rounded-md px-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/8 hover:text-white">
+              <Home size={18} strokeWidth={1.75} aria-hidden />
+              Back to the site
+            </Link>
+            <button type="button" onClick={() => void signOut()} className="flex min-h-10 w-full items-center gap-3 rounded-md px-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/8 hover:text-white">
+              <LogOut size={18} strokeWidth={1.75} aria-hidden />
+              Sign out
+            </button>
+          </>
+        ) : (
+          <div className="space-y-2 p-1">
+            <p className="px-2 text-xs text-white/60">Sign in to see your dashboards, submissions and rewards.</p>
+            <Button className="w-full" variant="accent" onClick={() => void id.signInWithGoogle()}>
+              Sign in with Google
+            </Button>
+            <Link to="/" className="flex min-h-10 items-center gap-3 rounded-md px-3 text-sm font-medium text-white/70 hover:bg-white/8 hover:text-white">
+              <Home size={18} strokeWidth={1.75} aria-hidden />
+              Back to the site
+            </Link>
           </div>
-        </aside>
-      )}
-      <div className="min-w-0">
-        <Outlet />
-      </div>
-    </div>
+        )
+      }
+      topRight={
+        <>
+          <Link
+            to="/notifications"
+            aria-label={(unread.data ?? 0) > 0 ? `Notifications, ${unread.data} unread` : 'Notifications'}
+            className="relative grid size-10 place-items-center rounded-md text-mute hover:bg-ink/5 hover:text-ink"
+          >
+            <Bell size={18} aria-hidden />
+            {(unread.data ?? 0) > 0 && <span aria-hidden className="absolute right-2 top-2 size-2 rounded-full bg-signal-deep ring-2 ring-surface" />}
+          </Link>
+          <Link to="/explore" className="inline-flex min-h-9 items-center gap-2 rounded-md border border-line bg-surface px-3 text-sm font-medium hover:border-ink/40">
+            <Compass size={15} aria-hidden />
+            <span className="hidden sm:inline">Explore bounties</span>
+          </Link>
+        </>
+      }
+    >
+      <Outlet />
+    </ConsoleShell>
   )
 }

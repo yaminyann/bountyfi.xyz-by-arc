@@ -204,3 +204,11 @@
     stroke-dashoffset: 0;
   }
 }
+
+/* Scroll areas that should scroll without drawing a bar (chip rails). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

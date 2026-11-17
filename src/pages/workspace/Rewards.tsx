@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Coins, Landmark, Receipt, Wallet } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { RequireIdentity } from '@/components/layout/RequireIdentity'
 import { TxLink } from '@/components/ui/Address'
@@ -62,10 +63,10 @@ function Content() {
   return (
     <div className="space-y-6">
       <StatGrid>
-        <Stat label="Received after fees" value={formatUsdc(net, 4)} unit="USDC" hint={<SourceBadge source="chain" />} />
-        <Stat label="Claim fees paid" value={formatUsdc(fees, 4)} unit="USDC" />
-        <Stat label="Ready to claim" value={formatUsdc(claimableTotal, 4)} unit="USDC" hint={claimable.length > 0 ? `${claimable.length} ${claimable.length === 1 ? 'prize' : 'prizes'}` : undefined} />
-        <Stat label="Funded into escrow" value={formatUsdc(escrowed, 4)} unit="USDC" hint={refunded > 0n ? `${formatUsdc(refunded, 4)} taken back` : undefined} />
+        <Stat icon={Wallet} label="Received after fees" value={formatUsdc(net, 4)} unit="USDC" hint={<SourceBadge source="chain" />} />
+        <Stat icon={Receipt} label="Claim fees paid" value={formatUsdc(fees, 4)} unit="USDC" />
+        <Stat icon={Coins} label="Ready to claim" value={formatUsdc(claimableTotal, 4)} unit="USDC" hint={claimable.length > 0 ? `${claimable.length} ${claimable.length === 1 ? 'prize' : 'prizes'}` : undefined} />
+        <Stat icon={Landmark} label="Funded into escrow" value={formatUsdc(escrowed, 4)} unit="USDC" hint={refunded > 0n ? `${formatUsdc(refunded, 4)} taken back` : undefined} />
       </StatGrid>
 
       <Tabs

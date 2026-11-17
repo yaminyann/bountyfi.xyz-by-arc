@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { BookOpen, Compass, FolderKanban, Menu, Plus, X } from 'lucide-react'
+import { BookOpen, Compass, FolderKanban, LayoutDashboard, Menu, X } from 'lucide-react'
 import { AccountPanel } from '@/components/layout/AccountPanel'
 import { SidebarNav } from '@/components/layout/Sidebar'
 import { useAuth } from '@/contexts/AuthContext'
@@ -10,7 +10,7 @@ const ITEM =
   'flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors active:bg-ink/5'
 
 /**
- * The phone navigation: four destinations and the one action the product exists for, posting a bounty.
+ * The phone navigation: browse bounties, projects, the user's workspace and the docs.
  * "More" opens a sheet with the account steps and every other page, so nothing is hidden behind an unlabelled icon.
  * The bar is only shown below the width where the header carries the same links.
  */
@@ -58,15 +58,14 @@ export function BottomNav() {
               </>
             )}
           </NavLink>
-          <div className="flex flex-1 items-center justify-center">
-            <NavLink
-              to="/create"
-              aria-label="Post a bounty"
-              className="grid size-12 -translate-y-2 place-items-center rounded-md border border-ink bg-signal text-ink shadow-retro-sm transition-transform active:translate-x-px active:translate-y-0 active:shadow-none"
-            >
-              <Plus size={24} aria-hidden strokeWidth={2.4} />
-            </NavLink>
-          </div>
+          <NavLink to="/dashboard" className={link}>
+            {({ isActive }) => (
+              <>
+                <LayoutDashboard size={20} aria-hidden strokeWidth={isActive ? 2.4 : 1.8} />
+                Workspace
+              </>
+            )}
+          </NavLink>
           <NavLink to="/docs" className={link}>
             {({ isActive }) => (
               <>

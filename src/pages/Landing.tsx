@@ -23,10 +23,9 @@ import {
 } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedback'
-import { PrizeCalculator } from '@/components/bounty/PrizeCalculator'
 import { PrizeLadder } from '@/components/bounty/PrizeLadder'
 import { StatusBadge } from '@/components/bounty/StatusBadge'
-import { BoardScene, ClaimScene, FinalityScene, FundScene, HeroScene, PickScene, ReceiptScene, SubmitScene } from '@/components/art/Scenes'
+import { BoardScene, ClaimScene, FinalityScene, FundScene, HeroScene, PickScene, SubmitScene } from '@/components/art/Scenes'
 import { Reveal } from '@/components/motion/Reveal'
 import { useCategories } from '@/lib/api/ecosystem'
 import { useBounties, usePublicStats } from '@/lib/api/queries'
@@ -308,8 +307,8 @@ function Hero() {
           <ButtonLink to="/explore" variant="primary" size="lg">
             Browse open bounties
           </ButtonLink>
-          <ButtonLink to="/create" size="lg">
-            Post a bounty
+          <ButtonLink to="/docs" size="lg">
+            How it works
           </ButtonLink>
         </Reveal>
         <Reveal delay={360} as="p" className="max-w-sm text-sm text-mute">
@@ -434,20 +433,6 @@ export default function Landing() {
       <Story />
 
       <OpenNow />
-
-      <section aria-labelledby="calc" className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
-        <ArtFrame>
-          <ReceiptScene />
-        </ArtFrame>
-        <div className="space-y-6">
-          <SectionHead id="calc" title="Know the payout before you post.">
-            Every deduction is a fixed rate in the contract, so these numbers are the numbers on-chain. The receipt shows a 100 USDC example.
-          </SectionHead>
-          <Reveal delay={200} className="rounded-lg border border-line bg-surface p-5 sm:p-6">
-            <PrizeCalculator />
-          </Reveal>
-        </div>
-      </section>
 
       <section aria-labelledby="checks" className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
         <div className="lg:sticky lg:top-24 lg:self-start">
@@ -599,8 +584,8 @@ export default function Landing() {
       <Reveal as="section" className="on-ink flex flex-col items-start justify-between gap-6 rounded-lg border border-ink bg-ink p-8 text-white sm:flex-row sm:items-center sm:p-10">
         <h2 className="max-w-md font-display text-3xl font-semibold leading-tight sm:text-4xl">Fund the first bounty, or claim the first prize.</h2>
         <div className="flex flex-wrap gap-3">
-          <ButtonLink to="/create" variant="accent" size="lg">
-            Post a bounty
+          <ButtonLink to="/explore" variant="accent" size="lg">
+            Browse open bounties
           </ButtonLink>
           <ButtonLink to="/docs" size="lg" className="border-white/30 bg-transparent text-white hover:bg-white/10">
             Read the docs

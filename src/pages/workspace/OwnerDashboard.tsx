@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus } from 'lucide-react'
+import { BriefcaseBusiness, ClipboardCheck, Coins, FolderKanban, Hourglass, Landmark, Plus, UserCheck, Users } from 'lucide-react'
 import { RequireIdentity } from '@/components/layout/RequireIdentity'
 import { ModerationBadge, StatusBadge } from '@/components/bounty/StatusBadge'
 import { ActivityList } from '@/components/ecosystem/ActivityList'
@@ -43,16 +43,16 @@ function Content({ wallet }: { wallet: string }) {
   return (
     <div className="space-y-8">
       <StatGrid>
-        <Stat label="Open for work" value={o.open} hint={`${o.total} bounties in total`} />
-        <Stat label="Pending reviews" value={toReview} tone={toReview > 0 ? 'warn' : undefined} hint={o.waitingOnContributors > 0 ? `${o.waitingOnContributors} waiting on contributors` : undefined} />
-        <Stat label="Funded rewards" value={formatUsdc(o.funded)} unit="USDC" hint={`${formatUsdc(o.escrowed)} still in escrow`} />
-        <Stat label="Distributed rewards" value={formatUsdc(o.distributed, 4)} unit="USDC" hint="Paid to winners after fees" />
+        <Stat icon={BriefcaseBusiness} label="Open for work" value={o.open} hint={`${o.total} bounties in total`} />
+        <Stat icon={ClipboardCheck} label="Pending reviews" value={toReview} tone={toReview > 0 ? 'warn' : undefined} hint={o.waitingOnContributors > 0 ? `${o.waitingOnContributors} waiting on contributors` : undefined} />
+        <Stat icon={Landmark} label="Funded rewards" value={formatUsdc(o.funded)} unit="USDC" hint={`${formatUsdc(o.escrowed)} still in escrow`} />
+        <Stat icon={Coins} label="Distributed rewards" value={formatUsdc(o.distributed, 4)} unit="USDC" hint="Paid to winners after fees" />
       </StatGrid>
       <StatGrid>
-        <Stat label="Projects" value={o.projects} />
-        <Stat label="Active contributors" value={o.activeContributors} />
-        <Stat label="Awaiting admin approval" value={o.awaitingApproval} />
-        <Stat label="Team requests" value={o.teamRequests} />
+        <Stat icon={FolderKanban} label="Projects" value={o.projects} />
+        <Stat icon={UserCheck} label="Active contributors" value={o.activeContributors} />
+        <Stat icon={Hourglass} label="Awaiting admin approval" value={o.awaitingApproval} />
+        <Stat icon={Users} label="Team requests" value={o.teamRequests} />
       </StatGrid>
 
       {o.unfunded > 0 && (

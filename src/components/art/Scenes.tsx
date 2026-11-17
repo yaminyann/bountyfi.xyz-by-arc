@@ -378,3 +378,69 @@ export function NotFoundScene() {
     </Scene>
   )
 }
+
+/**
+ * Footer artwork on the dark ground: a chain of blocks, the escrow vault, a payout ladder and a receipt, drawn in
+ * the same pixel language as the rest of the site. It is decoration, so it carries no text.
+ */
+export function FooterScene() {
+  const LINE = '#4A6785'
+  const FILL = '#16263A'
+  const DIM = '#2A3F57'
+  return (
+    <Scene label="Decorative pixel artwork: a chain of blocks, an escrow vault, a payout ladder and a receipt." className="w-full">
+      <svg viewBox="0 0 1200 160" preserveAspectRatio="xMidYMax slice" className="block h-32 w-full sm:h-48" shapeRendering="crispEdges" aria-hidden focusable="false">
+        <rect y="124" width="1200" height="36" fill="#0B121C" />
+        <rect y="122" width="1200" height="4" fill={LINE} />
+        {Array.from({ length: 50 }).map((_, i) => (
+          <rect key={i} x={i * 24 + (i % 2) * 12} y={136 + (i % 3) * 6} width="4" height="4" fill={DIM} />
+        ))}
+
+        {/* a chain of blocks */}
+        {Array.from({ length: 11 }).map((_, i) => (
+          <g key={i} className="a-pop" style={d(100 + i * 90)}>
+            <rect x={24 + i * 52} y={74} width="40" height="48" fill={i === 10 ? SIGNAL : FILL} stroke={i === 10 ? INK : LINE} strokeWidth="3" />
+            <rect x={32 + i * 52} y={86} width="24" height="4" fill={i === 10 ? INK : LINE} />
+            <rect x={32 + i * 52} y={96} width="14" height="4" fill={i === 10 ? SIGNAL_DEEP : DIM} />
+          </g>
+        ))}
+
+        {/* escrow vault */}
+        <g className="a-grow-y" style={d(700)}>
+          <rect x="648" y="38" width="96" height="84" fill={FILL} stroke={LINE} strokeWidth="3" />
+          <rect x="658" y="48" width="76" height="64" fill="none" stroke={DIM} strokeWidth="2" />
+          <rect x="686" y="70" width="20" height="22" fill={SIGNAL} />
+          <rect x="690" y="60" width="12" height="12" fill="none" stroke={SIGNAL} strokeWidth="4" />
+        </g>
+        <Coin x={688} y={22} delay={1100} />
+        <Coin x={688} y={6} delay={1300} />
+
+        {/* payout ladder */}
+        {[
+          { x: 800, h: 80, fill: SIGNAL, stroke: INK, delay: 900 },
+          { x: 848, h: 52, fill: FILL, stroke: LINE, delay: 1050 },
+          { x: 896, h: 32, fill: FILL, stroke: LINE, delay: 1200 },
+        ].map((b) => (
+          <rect key={b.x} className="a-grow-y" style={d(b.delay)} x={b.x} y={122 - b.h} width="36" height={b.h} fill={b.fill} stroke={b.stroke} strokeWidth="3" />
+        ))}
+
+        {/* receipt */}
+        <g className="a-drop" style={d(1400)}>
+          <rect x="980" y="48" width="84" height="74" fill={FILL} stroke={LINE} strokeWidth="3" />
+          <rect x="992" y="60" width="36" height="5" fill={LINE} />
+          <rect x="992" y="74" width="60" height="3" fill={DIM} />
+          <rect x="992" y="84" width="48" height="3" fill={DIM} />
+          <rect x="992" y="94" width="60" height="3" fill={DIM} />
+          <rect x="992" y="106" width="30" height="8" fill={SIGNAL} />
+        </g>
+
+        {/* a second, smaller run of blocks on the right edge */}
+        {Array.from({ length: 3 }).map((_, i) => (
+          <g key={i} className="a-pop" style={d(1500 + i * 90)}>
+            <rect x={1096 + i * 36} y={96 - i * 0} width="28" height="26" fill={FILL} stroke={LINE} strokeWidth="3" />
+          </g>
+        ))}
+      </svg>
+    </Scene>
+  )
+}
