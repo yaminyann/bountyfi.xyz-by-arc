@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BriefcaseBusiness, ClipboardCheck, Coins, FolderKanban, Hourglass, Landmark, Plus, UserCheck, Users } from 'lucide-react'
 import { RequireIdentity } from '@/components/layout/RequireIdentity'
+import { WalletStrip } from '@/components/workspace/WalletStrip'
 import { ModerationBadge, StatusBadge } from '@/components/bounty/StatusBadge'
 import { ActivityList } from '@/components/ecosystem/ActivityList'
 import { ReviewBadge } from '@/components/ecosystem/badges'
@@ -42,6 +43,7 @@ function Content({ wallet }: { wallet: string }) {
 
   return (
     <div className="space-y-8">
+      <WalletStrip />
       <StatGrid>
         <Stat icon={BriefcaseBusiness} label="Open for work" value={o.open} hint={`${o.total} bounties in total`} />
         <Stat icon={ClipboardCheck} label="Pending reviews" value={toReview} tone={toReview > 0 ? 'warn' : undefined} hint={o.waitingOnContributors > 0 ? `${o.waitingOnContributors} waiting on contributors` : undefined} />

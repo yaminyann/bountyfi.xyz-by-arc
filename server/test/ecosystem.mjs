@@ -9,7 +9,7 @@ export async function runEcosystemChecks(ctx) {
   console.log('\nContribution ecosystem')
 
   r = await api('GET', '/categories')
-  check('six default categories are served', r.status === 200 && r.body.items.length === 6 && r.body.items[0].slug === 'security', r.body)
+  check('the default categories are served', r.status === 200 && r.body.items.length === 22 && r.body.items[0].slug === 'security', r.body)
 
   // ---- projects --------------------------------------------------------------------------------
   r = await api('POST', '/projects', { auth: tok.stranger, body: { slug: 'nope', name: 'Nope' } })

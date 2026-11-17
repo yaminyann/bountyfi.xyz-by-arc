@@ -32,6 +32,7 @@ const Submissions = lazy(() => import('@/pages/workspace/Submissions'))
 const Rewards = lazy(() => import('@/pages/workspace/Rewards'))
 const Notifications = lazy(() => import('@/pages/workspace/Notifications'))
 const Settings = lazy(() => import('@/pages/workspace/Settings'))
+const WalletHub = lazy(() => import('@/pages/workspace/WalletHub'))
 
 const AdminLayout = lazy(() => import('@/pages/admin/AdminLayout'))
 const AdminOverview = lazy(() => import('@/pages/admin/Overview'))
@@ -90,6 +91,7 @@ export default function App() {
           <Route path="/rewards" element={<Rewards />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/wallet" element={<WalletHub />} />
           <Route path="/disputes/:id" element={<DisputePage />} />
         </Route>
 

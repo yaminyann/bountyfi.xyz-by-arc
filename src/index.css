@@ -5,6 +5,26 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    /* A slim, quiet scrollbar that belongs to the cool palette instead of the system default. */
+    scrollbar-width: thin;
+    scrollbar-color: #b4c8da transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #b4c8da;
+    border-radius: 9999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #8fa9c0;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
   }
 
   body {

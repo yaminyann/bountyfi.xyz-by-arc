@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { BadgeCheck, ClipboardCheck, Coins, Compass, GitPullRequest } from 'lucide-react'
 import { RequireIdentity } from '@/components/layout/RequireIdentity'
+import { WalletStrip } from '@/components/workspace/WalletStrip'
 import { BountyRow, BountyRowSkeleton } from '@/components/bounty/BountyRow'
 import { ActivityList } from '@/components/ecosystem/ActivityList'
 import { ButtonLink } from '@/components/ui/Button'
@@ -27,6 +28,7 @@ function Content() {
 
   return (
     <div className="space-y-8">
+      <WalletStrip />
       <StatGrid>
         <Stat icon={GitPullRequest} label="Active contributions" value={c.active} hint={c.pendingReview > 0 ? `${c.pendingReview} waiting for review` : 'Nothing waiting'} />
         <Stat icon={ClipboardCheck} label="Pending reviews" value={c.pendingReview} />

@@ -55,7 +55,7 @@ function AuthNotice() {
   )
 }
 
-const WORKSPACE_PREFIXES = ['/dashboard', '/workspace', '/submissions', '/rewards', '/notifications', '/settings', '/disputes']
+const WORKSPACE_PREFIXES = ['/dashboard', '/workspace', '/submissions', '/rewards', '/notifications', '/settings', '/wallet', '/disputes']
 
 const FALLBACK = (
   <div className="grid place-items-center py-24">

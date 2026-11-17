@@ -1,0 +1,37 @@
+-- More kinds of work. BountyFi is for anyone in the crypto space who has a task and someone who can finish it, so the
+-- catalogue covers the sectors protocols, DAOs, foundations, exchanges, creators and open-source maintainers actually
+-- pay for. Admins can still rename, reorder or hide any of these from the console. Existing rows are left alone.
+INSERT INTO categories (slug, name, description, icon, examples, sort_order) VALUES
+  ('smart-contracts', 'Smart contracts & protocols', 'Design, write and harden on-chain logic.', 'braces',
+   ARRAY['Contract development', 'Gas optimisation', 'Test suites and fuzzing', 'Protocol specifications'], 70),
+  ('docs', 'Documentation & tutorials', 'Words and walkthroughs that help builders ship.', 'book-open',
+   ARRAY['API documentation', 'Step-by-step tutorials', 'README and guides', 'Developer onboarding'], 80),
+  ('content', 'Content & writing', 'Articles, threads and stories that explain a project.', 'pen-line',
+   ARRAY['Articles and blog posts', 'Threads', 'Newsletters', 'Case studies'], 90),
+  ('translation', 'Translation & localization', 'Make a product readable in more languages.', 'languages',
+   ARRAY['Interface translation', 'Docs translation', 'Community channel moderation', 'Glossaries'], 100),
+  ('video', 'Video & media', 'Explainers, shows and recordings.', 'video',
+   ARRAY['Explainer videos', 'Short clips', 'Podcasts', 'Event recordings'], 110),
+  ('marketing', 'Marketing & partnerships', 'Bring in users and allies.', 'megaphone',
+   ARRAY['Campaign execution', 'Growth experiments', 'Partnership outreach', 'Ambassador programs'], 120),
+  ('data', 'Data & analytics', 'Turn on-chain activity into answers.', 'bar-chart-3',
+   ARRAY['Dashboards', 'On-chain analysis', 'Indexers and subgraphs', 'Research datasets'], 130),
+  ('governance', 'Governance & DAO operations', 'Keep a DAO or foundation running.', 'landmark',
+   ARRAY['Proposal drafting', 'Delegate research', 'Treasury reporting', 'Process design'], 140),
+  ('defi', 'DeFi & tokenomics', 'Models, mechanisms and risk work for token economies.', 'coins',
+   ARRAY['Economic modelling', 'Mechanism design', 'Risk analysis', 'Simulations'], 150),
+  ('ai', 'AI & agents', 'Tools that let software agents work on-chain.', 'bot',
+   ARRAY['Agent tools', 'MCP servers', 'Evaluation datasets', 'Automations'], 160),
+  ('infrastructure', 'Infrastructure & DevOps', 'The plumbing that keeps products online.', 'server',
+   ARRAY['Node operation', 'Monitoring and alerts', 'CI and release tooling', 'Developer tooling'], 170),
+  ('payments', 'Payments & integrations', 'Move money through wallets, apps and stores.', 'credit-card',
+   ARRAY['Wallet integrations', 'Checkout flows', 'Stablecoin apps', 'SDK plugins'], 180),
+  ('games', 'Games, NFT & culture', 'Creative work for games and digital collectibles.', 'gamepad-2',
+   ARRAY['Game art and assets', 'Level and quest design', 'Collection artwork', 'World-building'], 190),
+  ('education', 'Education & onboarding', 'Teach people how to use and build.', 'graduation-cap',
+   ARRAY['Courses and workshops', 'Learn-and-earn quests', 'Study guides', 'Mentoring'], 200),
+  ('events', 'Events & ecosystem', 'Gatherings and programs that grow a community.', 'calendar-days',
+   ARRAY['Hackathon challenges', 'Meetups and workshops', 'Hosting and moderation', 'Event operations'], 210),
+  ('support', 'Support & moderation', 'Answer questions and keep spaces healthy.', 'headset',
+   ARRAY['Community moderation', 'Help desk answers', 'FAQ upkeep', 'Issue triage'], 220)
+ON CONFLICT (slug) DO NOTHING;

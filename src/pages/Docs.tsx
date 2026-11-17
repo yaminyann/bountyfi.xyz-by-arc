@@ -5,6 +5,7 @@ import { BoardScene, FinalityScene, HeroScene, ReceiptScene } from '@/components
 import { Reveal } from '@/components/motion/Reveal'
 import { ButtonLink } from '@/components/ui/Button'
 import { useAppConfig } from '@/lib/api/queries'
+import { useCategories } from '@/lib/api/ecosystem'
 import { appChain, explorerAddress } from '@/lib/chain'
 import { cn } from '@/lib/cn'
 
@@ -76,6 +77,7 @@ interface DocSection {
 
 function useSections(): DocSection[] {
   const config = useAppConfig()
+  const categories = useCategories()
   const contract = config.data?.contractAddress
   const treasury = config.data?.treasuryAddress
   const usdc = config.data?.usdcAddress
@@ -231,6 +233,29 @@ function useSections(): DocSection[] {
       ),
     },
     {
+      id: 'sectors',
+      title: 'Kinds of work',
+      lead: 'Anything with a clear outcome and a way to check it can carry a prize.',
+      body: (
+        <>
+          <P>
+            BountyFi is not only for code. Protocols, DAOs, foundations, exchanges, creators and open-source maintainers post work in every area below, and anyone with the skill can take it. Admins can add or rename kinds of work as the catalogue grows.
+          </P>
+          <dl className="max-w-[68ch]">
+            {(categories.data ?? []).map((c) => (
+              <Pair key={c.slug} term={c.name}>
+                {c.description} <span className="text-ink/80">{c.examples.slice(0, 4).join(', ')}.</span>
+              </Pair>
+            ))}
+          </dl>
+          <H3>Who posts</H3>
+          <P>Solo maintainers, startups and studios, DAOs and foundations, exchanges and wallets, and communities. A single bounty and a ranked multi-winner program use the same escrow.</P>
+          <H3>Who gets paid</H3>
+          <P>Developers, security researchers, designers, writers and translators, analysts, community builders and moderators. Your profile and reward history are built from what the contract recorded.</P>
+        </>
+      ),
+    },
+    {
       id: 'ecosystem',
       title: 'Projects, teams and reviews',
       lead: 'The pieces around a bounty that help people work together.',
@@ -303,6 +328,39 @@ function useSections(): DocSection[] {
               When the Buy USDC option appears on a funding screen, Circle runs the card or bank payment on its own page and sends the USDC to your linked wallet. BountyFi never sees your payment details.
             </P>
           )}
+        </>
+      ),
+    },
+    {
+      id: 'funds',
+      title: 'Add and move funds',
+      lead: 'Get USDC onto Arc, bring it from another chain or swap it, all from your own wallet.',
+      body: (
+        <>
+          <P>
+            The <Link className="font-medium underline underline-offset-4" to="/wallet">Wallet and funds</Link> page in your workspace shows your USDC and EURC on Arc and has three tools. They run in your browser with your own wallet. BountyFi does not hold, route or charge a fee on these transfers.
+          </P>
+          <dl className="max-w-[68ch]">
+            <Pair term="Buy with a card">Circle Onramp, when it is switched on for this deployment. Circle runs the payment on its own page and sends USDC to your linked wallet.</Pair>
+            <Pair term="Bridge in">Circle’s Cross-Chain Transfer Protocol (CCTP) burns USDC on the source chain and mints it on Arc. You see a quote before anything moves.</Pair>
+            <Pair term="Swap">Swap USDC and EURC on Arc with Circle’s Swap. It is routed by a third-party aggregator (currently LiFi), shows the expected and the minimum amount first, and only runs when you press Swap.</Pair>
+            <Pair term="Faucet and providers">On the testnet, the Circle faucet gives test USDC and EURC. On mainnet, Arc lists providers that sell USDC on Arc directly.</Pair>
+          </dl>
+          <H3>How the bridge fees work</H3>
+          <Ul>
+            <li>
+              <strong>Standard</strong> transfers skip the CCTP protocol fee and take longer, around fifteen minutes.
+            </li>
+            <li>
+              <strong>Fast</strong> transfers usually finish in under a minute and add a protocol fee that depends on the source chain.
+            </li>
+            <li>
+              <strong>Receive the exact amount</strong> pays the fees on the source chain, so all of the amount you entered arrives. It uses Circle’s Forwarding Service, so the mint on Arc is done for you.
+            </li>
+          </Ul>
+          <P>
+            Fee levels are set by Circle and Arc and can change. The quote shows the actual fees for your transfer before you confirm. Read more in Circle’s documentation of CCTP and the App Kit bridge.
+          </P>
         </>
       ),
     },

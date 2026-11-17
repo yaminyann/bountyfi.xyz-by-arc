@@ -20,6 +20,7 @@ const TITLES: [string, string][] = [
   ['/rewards', 'Reward history'],
   ['/notifications', 'Notifications'],
   ['/settings', 'Settings and wallet'],
+  ['/wallet', 'Wallet and funds'],
   ['/admin', 'Admin console'],
 ]
 

@@ -19,6 +19,17 @@ import {
   Timer,
   Trophy,
   Webhook,
+  BarChart3,
+  Briefcase,
+  Building2,
+  Landmark,
+  Megaphone,
+  Palette,
+  PenLine,
+  ShieldCheck,
+  Store,
+  User,
+  Users,
   type LucideIcon,
 } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/Button'
@@ -141,11 +152,11 @@ function Categories() {
           <p className="mt-1 max-w-xl text-mute">Anything with a clear outcome can carry a reward, not only code.</p>
         </div>
         <Link to="/categories" className="inline-flex items-center gap-1 text-sm font-medium underline underline-offset-2">
-          All categories <ArrowRight size={14} aria-hidden />
+          All {query.data.length} categories <ArrowRight size={14} aria-hidden />
         </Link>
       </div>
       <ul className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
-        {query.data.map((c) => {
+        {query.data.slice(0, 9).map((c) => {
           const Icon = categoryIcon(c.icon)
           return (
             <li key={c.slug} className="min-w-0 bg-surface">
@@ -177,6 +188,24 @@ const STEPS: { title: string; body: string; scene: ReactNode }[] = [
   { title: 'Submit', body: 'Contributors send work before the deadline. Each submission is recorded on-chain as a hash of its text.', scene: <SubmitScene /> },
   { title: 'Pick', body: 'The creator picks winners once. Places fill from the top, and unused places return to the creator.', scene: <PickScene /> },
   { title: 'Claim', body: 'Each winner claims within 7 days of approval and keeps the prize minus the 5% claim fee. Anything unclaimed can go back to the creator.', scene: <ClaimScene /> },
+]
+
+const POSTERS: { icon: LucideIcon; title: string; body: string }[] = [
+  { icon: User, title: 'Open-source maintainers', body: 'Pay for the issue nobody has time to fix.' },
+  { icon: Building2, title: 'Startups and studios', body: 'Buy a feature, a design or an integration without a contract.' },
+  { icon: Landmark, title: 'DAOs, foundations and ecosystem funds', body: 'Run grants and programs as funded, reviewable tasks.' },
+  { icon: Store, title: 'Exchanges, wallets and protocols', body: 'Crowd-source audits, listings research and localisation.' },
+  { icon: Megaphone, title: 'Communities and creators', body: 'Commission content, translations and events.' },
+  { icon: Briefcase, title: 'Agencies and consultancies', body: 'Hand off overflow work with the payment already locked.' },
+]
+
+const SOLVERS: { icon: LucideIcon; title: string; body: string }[] = [
+  { icon: Braces, title: 'Developers', body: 'Contracts, apps, tooling and bug fixes.' },
+  { icon: ShieldCheck, title: 'Security researchers and auditors', body: 'Reports can be encrypted to the creator.' },
+  { icon: Palette, title: 'Designers and video makers', body: 'Interfaces, brands, explainers and clips.' },
+  { icon: PenLine, title: 'Writers and translators', body: 'Docs, articles, threads and localisation.' },
+  { icon: BarChart3, title: 'Analysts and researchers', body: 'Dashboards, on-chain analysis and market work.' },
+  { icon: Users, title: 'Community builders and moderators', body: 'Support, onboarding, quests and events.' },
 ]
 
 const CHECKS: { icon: LucideIcon; title: string; body: string }[] = [
@@ -454,6 +483,46 @@ export default function Landing() {
       </section>
 
       <Categories />
+
+      <section aria-labelledby="everyone" className="space-y-10">
+        <SectionHead id="everyone" title="Work from every corner of crypto.">
+          A one-person fix and a ranked, multi-winner program use the same escrow. Post what you need, or take what you can do.
+        </SectionHead>
+        <div className="grid gap-10 md:grid-cols-2 md:gap-12">
+          <div>
+            <Reveal as="h3" className="mb-2 font-display text-lg font-semibold">
+              Who posts work
+            </Reveal>
+            <ul className="divide-y divide-line border-y border-line">
+              {POSTERS.map((r, i) => (
+                <Reveal as="li" key={r.title} delay={i * 60} className="grid grid-cols-[2.5rem_1fr] gap-4 py-4">
+                  <IconTile icon={r.icon} />
+                  <div>
+                    <p className="font-display font-semibold">{r.title}</p>
+                    <p className="mt-0.5 text-sm text-mute">{r.body}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <Reveal as="h3" className="mb-2 font-display text-lg font-semibold">
+              Who gets paid for it
+            </Reveal>
+            <ul className="divide-y divide-line border-y border-line">
+              {SOLVERS.map((r, i) => (
+                <Reveal as="li" key={r.title} delay={i * 60} className="grid grid-cols-[2.5rem_1fr] gap-4 py-4">
+                  <IconTile icon={r.icon} />
+                  <div>
+                    <p className="font-display font-semibold">{r.title}</p>
+                    <p className="mt-0.5 text-sm text-mute">{r.body}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
 
       <section aria-labelledby="modules" className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16">
         <div className="space-y-6">

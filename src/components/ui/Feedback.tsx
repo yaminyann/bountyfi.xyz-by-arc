@@ -20,6 +20,7 @@ import {
   Settings,
   Trophy,
   Users,
+  Wallet,
   XCircle,
   type LucideProps,
 } from 'lucide-react'
@@ -163,6 +164,7 @@ const HEADER_ICONS: [string, ComponentType<LucideProps>][] = [
   ['/rewards', Coins],
   ['/notifications', Bell],
   ['/settings', Settings],
+  ['/wallet', Wallet],
 ]
 
 /** Page title block shared by every inner page: an icon tile chosen from the route, the title, and a hairline below. */

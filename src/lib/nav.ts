@@ -15,6 +15,7 @@ import {
   Palette,
   Cpu,
   Layers,
+  Server,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -24,6 +25,19 @@ import {
   Users,
   Code,
   Bell,
+  BarChart3,
+  Bot,
+  Braces,
+  CalendarDays,
+  CreditCard,
+  Gamepad2,
+  GraduationCap,
+  Headset,
+  Landmark,
+  Languages,
+  PenLine,
+  Video,
+  Wallet,
   type LucideProps,
 } from 'lucide-react'
 
@@ -51,6 +65,7 @@ export const WORKSPACE_NAV: NavItem[] = [
   { to: '/workspace/projects', label: 'My projects', icon: FolderKanban },
   { to: '/workspace/contributions', label: 'My contributions', icon: GitPullRequest },
   { to: '/workspace/teams', label: 'Team bounties', icon: Users },
+  { to: '/wallet', label: 'Wallet and funds', icon: Wallet },
 ]
 
 export const ACTIVITY_NAV: NavItem[] = [
@@ -79,6 +94,20 @@ export const CATEGORY_ICONS: Record<string, Icon> = {
   cpu: Cpu,
   layers: Layers,
   sparkles: Sparkles,
+  braces: Braces,
+  'pen-line': PenLine,
+  languages: Languages,
+  video: Video,
+  'bar-chart-3': BarChart3,
+  landmark: Landmark,
+  coins: Coins,
+  bot: Bot,
+  server: Server,
+  'credit-card': CreditCard,
+  'gamepad-2': Gamepad2,
+  'graduation-cap': GraduationCap,
+  'calendar-days': CalendarDays,
+  headset: Headset,
 }
 
 export const CATEGORY_ICON_NAMES = Object.keys(CATEGORY_ICONS)

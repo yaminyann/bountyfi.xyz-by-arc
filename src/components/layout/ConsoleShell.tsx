@@ -113,7 +113,7 @@ export function ConsoleShell({ product, home, groups, crumb, root, sidebarFooter
         <div className="px-5 py-5">
           <Brand product={product} home={home} />
         </div>
-        <div className="flex-1 overflow-y-auto px-3 pb-4">
+        <div className="no-scrollbar flex-1 overflow-y-auto px-3 pb-4">
           <SideNav groups={groups} />
         </div>
         <div className="border-t border-white/12 p-3">{sidebarFooter}</div>
@@ -129,7 +129,7 @@ export function ConsoleShell({ product, home, groups, crumb, root, sidebarFooter
                 <X size={20} aria-hidden />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto px-3 pb-4">
+            <div className="no-scrollbar flex-1 overflow-y-auto px-3 pb-4">
               <SideNav groups={groups} onNavigate={() => setOpenOn(null)} />
             </div>
             <div className="border-t border-white/12 p-3">{sidebarFooter}</div>
