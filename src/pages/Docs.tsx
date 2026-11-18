@@ -298,6 +298,7 @@ function useSections(): DocSection[] {
             <Pair term="Milestones">Split large work into reviewable pieces with planned rewards. Contributors submit against a milestone and the creator marks it reviewed.</Pair>
             <Pair term="Team bounties">Assemble a team, assign roles and agree the split. The team settles payment between themselves, because the contract pays a single wallet per place.</Pair>
             <Pair term="Applications">A creator can ask contributors to apply first. This is coordination only. It never stops anyone from submitting on-chain.</Pair>
+            <Pair term="Reviewers">A creator can name up to five people on one bounty to read submissions and comment. It is unpaid and advisory: reviewers cannot pick winners, and someone who submitted to the bounty cannot review it.</Pair>
             <Pair term="Reviews">Every submission has a thread: comments, requested revisions, approval or rejection. Project members review, but only the bounty creator’s wallet can pick winners.</Pair>
             <Pair term="Disputes">Either side can open a thread with a mediator. The outcome is recorded and non-binding. Links in a dispute follow the same safety rules as everywhere else, and a creator who has not answered is reminded on the third and sixth day.</Pair>
             <Pair term="Recurring programs">Plan weekly or monthly work and publish each cycle as its own funded bounty.</Pair>

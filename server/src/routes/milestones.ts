@@ -4,7 +4,7 @@ import { query, withTransaction } from '../db.js'
 import { getLinkedWallet, isAdminUser, optionalAuth, requireAuth, requireLinkedWallet } from '../auth.js'
 import { HttpError, isUuid, parse, parseOnchainId, route } from '../lib/http.js'
 import { rateLimit } from '../lib/limits.js'
-import { canSeeBounty, httpUrl, isBountyCreator, loadBountyAccess, projectRole, reviewerUserIds } from '../lib/ecosystem.js'
+import { canSeeBounty, httpUrl, isBountyCreator, isBountyReviewer, loadBountyAccess, projectRole, reviewerUserIds } from '../lib/ecosystem.js'
 import { notify } from '../services/notify.js'
 
 /**
@@ -60,7 +60,7 @@ milestonesRouter.get(
     if (!(await canSeeBounty(req, bounty))) throw new HttpError(404, 'Bounty not found')
 
     const viewerWallet = req.user ? await getLinkedWallet(req.user.id) : null
-    const onProject = req.user && bounty.project_id ? (await projectRole(req.user.id, bounty.project_id)) !== null : false
+    const onProject = (req.user && bounty.project_id ? (await projectRole(req.user.id, bounty.project_id)) !== null : false) || (req.user ? await isBountyReviewer(req.user.id, bounty.id) : false)
     const reviewer = isAdminUser(req.user) || (req.user !== undefined && bounty.creator_user_id === req.user.id) || (viewerWallet !== null && viewerWallet === bounty.creator_wallet) || onProject
 
     const milestones = await query<MilestoneRow>(

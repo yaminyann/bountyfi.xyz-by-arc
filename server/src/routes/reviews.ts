@@ -4,7 +4,7 @@ import { query, withTransaction } from '../db.js'
 import { isAdminUser, requireAuth, requireLinkedWallet, getLinkedWallet } from '../auth.js'
 import { HttpError, isUuid, parse, route } from '../lib/http.js'
 import { rateLimit } from '../lib/limits.js'
-import { REVIEW_DECISIONS, httpUrl, projectRole, reviewerUserIds } from '../lib/ecosystem.js'
+import { REVIEW_DECISIONS, httpUrl, isBountyReviewer, projectRole, reviewerUserIds } from '../lib/ecosystem.js'
 import { notify } from '../services/notify.js'
 
 /**
@@ -70,6 +70,7 @@ async function viewerFor(req: Request, target: Target): Promise<Viewer> {
   if (target.submitterUserId === user.id || (wallet !== null && wallet === target.submitterWallet)) return { role: 'contributor', userId: user.id, wallet }
   // Everyone on the bounty's project reviews on behalf of the creator (but never their own work, handled above).
   if (target.projectId && (await projectRole(user.id, target.projectId)) !== null) return { role: 'reviewer', userId: user.id, wallet }
+  if (await isBountyReviewer(user.id, target.bountyRowId)) return { role: 'reviewer', userId: user.id, wallet }
   if (isAdminUser(user)) return { role: 'admin', userId: user.id, wallet }
   // Do not reveal that the submission exists to strangers.
   throw new HttpError(404, 'Submission not found')

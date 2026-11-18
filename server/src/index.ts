@@ -17,6 +17,7 @@ import { myProfileRouter, profilesRouter } from './routes/profiles.js'
 import { projectsRouter, recurringRouter } from './routes/projects.js'
 import { reviewsRouter } from './routes/reviews.js'
 import { teamsRouter } from './routes/teams.js'
+import { reviewersRouter } from './routes/reviewers.js'
 import { alertsRouter, badgeRouter, creatorsRouter, encryptionRouter, submissionsRouter } from './routes/trust.js'
 import { applicationsRouter } from './routes/applications.js'
 import { adminDisputesRouter, disputesRouter } from './routes/disputes.js'
@@ -81,6 +82,7 @@ app.use('/api', (req: Request, res: Response, next: NextFunction) => {
 app.use('/api/auth', authRouter)
 app.use('/api/bounties', milestonesRouter)
 app.use('/api/bounties', teamsRouter)
+app.use('/api/bounties', reviewersRouter)
 app.use('/api/bounties', applicationsRouter)
 app.use('/api/bounties', bountiesRouter)
 // Notifications and the profile form only need a Google session; the rest of /api/me also needs a linked wallet.

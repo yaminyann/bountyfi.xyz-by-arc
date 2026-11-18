@@ -195,14 +195,22 @@ export async function projectRole(userId: string, projectId: string, db: Queryab
 /** Owners and managers can edit a project, its programs and its members. */
 export const canManageProject = (role: ProjectRole | null): boolean => role === 'owner' || role === 'manager'
 
-/** Users who review submissions of a bounty: its creator plus everyone on the bounty's project. */
+/** Whether the creator named this person as a reviewer of this one bounty. */
+export async function isBountyReviewer(userId: string, bountyRowId: string, db: Queryable = { query }): Promise<boolean> {
+  const res = await db.query('SELECT 1 FROM bounty_reviewers WHERE bounty_id = $1 AND user_id = $2', [bountyRowId, userId])
+  return (res.rowCount ?? 0) > 0
+}
+
+/** Users who review submissions of a bounty: its creator, everyone on its project and the reviewers the creator named. */
 export async function reviewerUserIds(bountyRowId: string, db: Queryable = { query }): Promise<string[]> {
   const res = await db.query<{ id: string }>(
     `SELECT b.creator_user_id AS id FROM bounties b WHERE b.id = $1 AND b.creator_user_id IS NOT NULL
      UNION
      SELECT p.owner_user_id FROM bounties b JOIN projects p ON p.id = b.project_id WHERE b.id = $1 AND p.owner_user_id IS NOT NULL
      UNION
-     SELECT m.user_id FROM bounties b JOIN project_members m ON m.project_id = b.project_id WHERE b.id = $1`,
+     SELECT m.user_id FROM bounties b JOIN project_members m ON m.project_id = b.project_id WHERE b.id = $1
+     UNION
+     SELECT r.user_id FROM bounty_reviewers r WHERE r.bounty_id = $1`,
     [bountyRowId],
   )
   return res.rows.map((r) => r.id)

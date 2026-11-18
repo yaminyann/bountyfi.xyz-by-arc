@@ -11,7 +11,7 @@ import { TtlCache, rateLimit } from '../lib/limits.js'
 import { BountyMetadataSchema, SubmissionMetadataSchema, bountyCommitment, submissionCommitment } from '../lib/metadata.js'
 import { syncBounty, upsertChainBounty } from '../services/bountySync.js'
 import { nudgeIndexer } from '../services/indexer.js'
-import { DIFFICULTIES, ListingSchema, SLUG_RE, isBountyCreator, likePattern, loadBountyAccess, projectRole, resolveListing } from '../lib/ecosystem.js'
+import { DIFFICULTIES, ListingSchema, SLUG_RE, isBountyCreator, isBountyReviewer, likePattern, loadBountyAccess, projectRole, resolveListing } from '../lib/ecosystem.js'
 import { checkSubmissionPr } from '../services/github.js'
 import {
   BOUNTY_DETAIL_COLUMNS,
@@ -198,6 +198,7 @@ bountiesRouter.get(
       const link = await query<{ project_id: string | null }>('SELECT project_id FROM bounties WHERE id = $1', [bounty.id])
       const projectId = link.rows[0]?.project_id
       viewerCanReview = projectId ? (await projectRole(req.user.id, projectId)) !== null : false
+      if (!viewerCanReview) viewerCanReview = await isBountyReviewer(req.user.id, bounty.id)
     }
 
     const cacheable = publiclyVisible && !req.user

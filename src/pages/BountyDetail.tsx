@@ -16,6 +16,7 @@ import { Badge, Callout, EmptyState, ErrorState, Section, Skeleton } from '@/com
 import { Tabs } from '@/components/ui/Tabs'
 import { FundBounty } from '@/features/bounty/FundBounty'
 import { ListingEditor } from '@/features/bounty/ListingEditor'
+import { ReviewersPanel } from '@/features/bounty/Reviewers'
 import { MilestonesPanel } from '@/features/bounty/MilestonesPanel'
 import { ReviewDialog } from '@/features/bounty/ReviewDialog'
 import { SelectWinners } from '@/features/bounty/SelectWinners'
@@ -469,6 +470,7 @@ export default function BountyDetail() {
                     </Button>
                   )}
                 </div>
+                {isCreator && <ReviewersPanel onchainId={bounty.onchainId} />}
               </div>
             )}
 
