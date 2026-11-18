@@ -37,7 +37,9 @@ import { EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedback'
 import { PrizeLadder } from '@/components/bounty/PrizeLadder'
 import { StatusBadge } from '@/components/bounty/StatusBadge'
 import { BoardScene, ClaimScene, FinalityScene, FundScene, HeroScene, PickScene, SubmitScene } from '@/components/art/Scenes'
+import { LadderShowcase, VaultShowcase } from '@/components/art/Showcase'
 import { Reveal } from '@/components/motion/Reveal'
+import { cn } from '@/lib/cn'
 import { useCategories } from '@/lib/api/ecosystem'
 import { useBounties, usePublicStats } from '@/lib/api/queries'
 import { categoryIcon } from '@/lib/nav'
@@ -422,6 +424,52 @@ function Faq() {
   )
 }
 
+/** A dark band with an image on one side and a short, factual statement on the other. */
+function ShowcaseBand({
+  id,
+  title,
+  body,
+  points,
+  to,
+  cta,
+  image,
+  imageRight = false,
+}: {
+  id: string
+  title: string
+  body: string
+  points: string[]
+  to: string
+  cta: string
+  image: ReactNode
+  imageRight?: boolean
+}) {
+  return (
+    <Reveal as="section" className="on-ink overflow-hidden rounded-2xl border border-ink bg-[#070707] text-white shadow-retro">
+      <div aria-labelledby={id} role="group" className="grid items-center md:grid-cols-2">
+        <div className={cn('aspect-[4/3] w-full bg-black md:aspect-auto md:h-full md:min-h-[26rem]', imageRight && 'md:order-2')}>{image}</div>
+        <div className="space-y-6 p-8 sm:p-10 lg:p-14">
+          <h2 id={id} className="font-display text-3xl font-semibold leading-tight sm:text-4xl">
+            {title}
+          </h2>
+          <p className="max-w-md text-white/75">{body}</p>
+          <ul className="space-y-3">
+            {points.map((p) => (
+              <li key={p} className="grid grid-cols-[1.25rem_1fr] gap-3 text-sm text-white/90">
+                <Check size={18} strokeWidth={2.25} aria-hidden className="mt-0.5 text-signal" />
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+          <ButtonLink to={to} variant="accent" size="lg">
+            {cta}
+          </ButtonLink>
+        </div>
+      </div>
+    </Reveal>
+  )
+}
+
 export default function Landing() {
   return (
     <div className="space-y-24 sm:space-y-32">
@@ -461,6 +509,16 @@ export default function Landing() {
 
       <Story />
 
+      <ShowcaseBand
+        id="escrow-band"
+        title="Locked before it is listed."
+        body="A bounty only appears once its prize is in the contract. The creator cannot spend it, and BountyFi cannot touch it."
+        points={['The prize is escrowed when the bounty is funded', 'The contract has no owner or admin key', 'Unclaimed prizes return to the creator after 7 days']}
+        to="/docs#overview"
+        cta="How escrow works"
+        image={<VaultShowcase />}
+      />
+
       <OpenNow />
 
       <section aria-labelledby="checks" className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
@@ -481,6 +539,17 @@ export default function Landing() {
           ))}
         </ul>
       </section>
+
+      <ShowcaseBand
+        id="trust-band"
+        title="Checked, not promised."
+        body="The text on the page must match the hash on-chain, and each submission is recorded the same way. Anyone can verify it on the explorer."
+        points={['Bounty and submission text locked by hash', 'GitHub pull request state read from GitHub', 'Sensitive reports encrypted to the creator']}
+        to="/docs#sectors"
+        cta="See how work is checked"
+        imageRight
+        image={<img src="/brand/trust-shield.webp" width={1448} height={1086} loading="lazy" alt="A yellow shield with a check mark on a glowing podium, surrounded by a code card, a document and an image card." className="size-full object-cover" />}
+      />
 
       <Categories />
 
@@ -647,6 +716,16 @@ export default function Landing() {
           </Reveal>
         </div>
       </section>
+
+      <ShowcaseBand
+        id="ladder-band"
+        title="Paid by place, by the contract."
+        body="One winner or up to ten ranked places. The split is fixed when the bounty is created, and unused places return to the creator."
+        points={['Any non-increasing split, such as 50, 30 and 20', 'Winners claim within 7 days of approval', 'A 0.5% post fee and a 5% claim fee, nothing else']}
+        to="/explore"
+        cta="Browse open bounties"
+        image={<LadderShowcase />}
+      />
 
       <Faq />
 

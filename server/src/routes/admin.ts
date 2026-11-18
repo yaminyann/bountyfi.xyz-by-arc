@@ -5,6 +5,7 @@ import { config } from '../config.js'
 import { readTreasuryBalance, publicClient } from '../chain.js'
 import { pool, query } from '../db.js'
 import { HttpError, clampInt, parse, parseOnchainId, queryString, route } from '../lib/http.js'
+import { likePattern } from '../lib/ecosystem.js'
 import { TtlCache } from '../lib/limits.js'
 import { indexerStatus } from '../services/indexer.js'
 import { BOUNTY_LIST_COLUMNS, toTsQuery } from '../services/projections.js'
@@ -133,7 +134,7 @@ adminRouter.get(
     }
     if (search) {
       const ts = toTsQuery(search)
-      params.push(`%${search.toLowerCase()}%`)
+      params.push(likePattern(search.toLowerCase()))
       const likeIdx = params.length
       if (ts) {
         params.push(ts)
@@ -312,7 +313,7 @@ adminRouter.get(
     const params: unknown[] = []
     let where = ''
     if (search) {
-      params.push(`%${search}%`)
+      params.push(likePattern(search))
       where = `WHERE s.submitter_wallet LIKE $1 OR LOWER(b.title) LIKE $1 OR LOWER(COALESCE(su.email, '')) LIKE $1`
     }
     params.push(limit, offset)
@@ -346,7 +347,7 @@ adminRouter.get(
     const params: unknown[] = []
     let where = ''
     if (search) {
-      params.push(`%${search}%`)
+      params.push(likePattern(search))
       where = `WHERE LOWER(COALESCE(u.email, '')) LIKE $1 OR LOWER(COALESCE(u.display_name, '')) LIKE $1 OR COALESCE(w.address, '') LIKE $1`
     }
     params.push(limit, offset)

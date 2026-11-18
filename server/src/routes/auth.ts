@@ -100,16 +100,22 @@ authRouter.post(
       throw new HttpError(409, 'This wallet is already linked to another account.')
     }
 
-    await withTransaction(async (db) => {
-      await db.query('DELETE FROM wallet_challenges WHERE user_id = $1', [user.id])
-      await db.query(
-        `INSERT INTO wallets (user_id, address, chain_id, verified, verification_method, linked_at, updated_at)
-         VALUES ($1, $2, $3, TRUE, 'signature_challenge', NOW(), NOW())
-         ON CONFLICT (user_id) DO UPDATE SET
-           address = EXCLUDED.address, chain_id = EXCLUDED.chain_id, verified = TRUE, linked_at = NOW(), updated_at = NOW()`,
-        [user.id, address, config.chain.id],
-      )
-    })
+    try {
+      await withTransaction(async (db) => {
+        await db.query('DELETE FROM wallet_challenges WHERE user_id = $1', [user.id])
+        await db.query(
+          `INSERT INTO wallets (user_id, address, chain_id, verified, verification_method, linked_at, updated_at)
+           VALUES ($1, $2, $3, TRUE, 'signature_challenge', NOW(), NOW())
+           ON CONFLICT (user_id) DO UPDATE SET
+             address = EXCLUDED.address, chain_id = EXCLUDED.chain_id, verified = TRUE, linked_at = NOW(), updated_at = NOW()`,
+          [user.id, address, config.chain.id],
+        )
+      })
+    } catch (err) {
+      // Unique index on the address: another account linked it between the check above and this write.
+      if ((err as { code?: string }).code === '23505') throw new HttpError(409, 'This wallet is already linked to another account.')
+      throw err
+    }
 
     res.json({ wallet: address })
   }),

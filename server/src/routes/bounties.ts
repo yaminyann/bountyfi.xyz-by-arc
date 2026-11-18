@@ -304,6 +304,7 @@ bountiesRouter.post(
 // ---------------------------------------------------------------------------
 
 const lastRefresh = new Map<number, number>()
+let lastFlush = 0
 
 bountiesRouter.post(
   '/:id/refresh',
@@ -320,7 +321,10 @@ bountiesRouter.post(
 
     const synced = await syncBounty(id)
     if (!synced) throw new HttpError(404, 'Bounty not found on-chain')
-    listCache.invalidate()
+    if (now - lastFlush > 2_000) {
+      lastFlush = now
+      listCache.invalidate()
+    }
     nudgeIndexer()
     res.json({ refreshed: true, status: synced.chain.status })
   }),

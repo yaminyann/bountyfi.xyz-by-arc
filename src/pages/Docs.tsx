@@ -357,6 +357,36 @@ function useSections(): DocSection[] {
       ),
     },
     {
+      id: 'safety',
+      title: 'Staying safe',
+      lead: 'The escrow protects the money. These habits protect you from everything else.',
+      body: (
+        <>
+          <H3>If you take work</H3>
+          <Ul>
+            <li>A real bounty never asks you to pay to apply, to send a seed phrase or a private key, or to sign something you do not understand.</li>
+            <li>Open the creator’s record before you start. It is counted from the contract: how many bounties were funded, how many paid out, how many were reclaimed after submissions.</li>
+            <li>Check the deadline and the review period. After the deadline the creator has 7 days to review before they can take the prize back.</li>
+            <li>Treat links in a task with care. Open them in a browser profile without your wallet.</li>
+            <li>Keep your work in a public place with a date, so you can show what you delivered.</li>
+          </Ul>
+          <H3>If you post work</H3>
+          <Ul>
+            <li>Write criteria a stranger can answer yes or no to, and say which proof you need.</li>
+            <li>Read every submission’s link before opening it. Do not install or run files from a submission outside a sandbox.</li>
+            <li>Pick winners before the review period ends. Unpicked work is the most common reason people stop trusting a creator.</li>
+          </Ul>
+          <H3>What BountyFi already does</H3>
+          <P>
+            It lists a bounty only after the prize is escrowed and an admin has reviewed it, locks the text by its hash, accepts one submission per wallet, requires a Google account and a linked wallet to act, limits how fast an account can write, and accepts only https links. It has no file uploads.
+          </P>
+          <P>
+            It does not yet score links for safety, cap submissions per account or verify a project’s identity. Do not treat the absence of a warning as proof that something is safe. Report a problem through the address in <Code>/.well-known/security.txt</Code>.
+          </P>
+        </>
+      ),
+    },
+    {
       id: 'wallet',
       title: 'Accounts and wallet signatures',
       lead: 'A Google account proves who you are. The wallet proves who is paid.',

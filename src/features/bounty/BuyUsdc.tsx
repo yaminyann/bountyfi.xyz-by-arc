@@ -30,7 +30,10 @@ export function BuyUsdc() {
     try {
       const session = await start.mutateAsync()
       setLink(session.url)
-      if (popup) popup.location.href = session.url
+      if (popup) {
+        popup.opener = null
+        popup.location.href = session.url
+      }
     } catch {
       popup?.close()
     }
