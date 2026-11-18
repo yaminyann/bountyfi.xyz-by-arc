@@ -197,6 +197,21 @@ export async function runTrustControlChecks(ctx, fakes) {
   const count = (await notificationsOf('creator', 'review_reminder')).length
   await api('POST', '/admin/jobs/nudges', { auth: tok.admin })
   check('running it again does not repeat a reminder', (await notificationsOf('creator', 'review_reminder')).length === count)
+
+  // a creator who has not answered an open dispute is asked to, once per milestone
+  const quiet = await db.query(
+    `INSERT INTO disputes (submission_id, bounty_id, reason, summary, created_at)
+     VALUES ($1, (SELECT bounty_id FROM submissions WHERE id = $1), 'rejected', 'Test dispute that the creator has not answered yet, left open for several days.', NOW() - INTERVAL '2 days' - INTERVAL '1 hour') RETURNING id`,
+    [copy.id],
+  )
+  const quietId = quiet.rows[0].id
+  r = await api('POST', '/admin/jobs/nudges', { auth: tok.admin })
+  check('the reminder job counts an unanswered dispute', r.status === 200 && r.body.disputes >= 1, r.body)
+  const disputeReminders = await notificationsOf('creator', 'dispute_reminder')
+  check('the creator is asked to answer, with a link to the dispute', disputeReminders.some((n) => n.link === `/disputes/${quietId}`), disputeReminders)
+  await api('POST', '/admin/jobs/nudges', { auth: tok.admin })
+  check('and it is not repeated the same day', (await notificationsOf('creator', 'dispute_reminder')).length === disputeReminders.length)
+  await db.query(`DELETE FROM disputes WHERE id = $1`, [quietId])
   await db.query(days(6))
   r = await api('POST', '/admin/jobs/nudges', { auth: tok.admin })
   check('on the last day contributors are told the creator has not decided', r.body.contributors >= 1 && (await notificationsOf('bob', 'review_overdue')).length === 1, r.body)

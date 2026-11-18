@@ -4,7 +4,7 @@ import { notify } from './notify.js'
 /**
  * Time-based reminders that keep bounties moving. A creator who has submissions to review is reminded when the review
  * period starts and again on its third and last days; contributors are told when it runs out; winners are reminded to
- * claim before their 7 days end. Each reminder is stored once (a dedupe key), so running this as often as you like
+ * claim before their 7 days end; a creator who has not answered an open dispute is asked to on its third and sixth day. Each reminder is stored once (a dedupe key), so running this as often as you like
  * never repeats one. Nothing here moves money or changes a bounty.
  */
 
@@ -18,8 +18,8 @@ interface ReviewRow {
   deadline: string
 }
 
-export async function runNudges(now: Date = new Date()): Promise<{ creators: number; contributors: number; winners: number }> {
-  const counts = { creators: 0, contributors: 0, winners: 0 }
+export async function runNudges(now: Date = new Date()): Promise<{ creators: number; contributors: number; winners: number; disputes: number }> {
+  const counts = { creators: 0, contributors: 0, winners: 0, disputes: 0 }
 
   // ---- bounties past their deadline with submissions waiting -----------------------------------
   const reviewing = await query<ReviewRow>(
@@ -90,6 +90,28 @@ export async function runNudges(now: Date = new Date()): Promise<{ creators: num
         dedupeKey: `nudge:claim:${u.id}:${u.wallet}:${day}`,
       })
       counts.winners += 1
+    }
+  }
+
+  // ---- open disputes where the creator has not answered -----------------------------------------------
+  const waiting = await query<{ id: string; created_at: string; title: string; creator_user_id: string }>(
+    `SELECT d.id, d.created_at, b.title, b.creator_user_id
+       FROM disputes d JOIN bounties b ON b.id = d.bounty_id
+      WHERE d.status = 'open' AND b.creator_user_id IS NOT NULL
+        AND NOT EXISTS (SELECT 1 FROM dispute_comments c WHERE c.dispute_id = d.id AND c.author_role = 'creator')`,
+  )
+  for (const d of waiting.rows) {
+    const day = Math.floor((now.getTime() - new Date(d.created_at).getTime()) / DAY)
+    if (day === 2 || day === 5) {
+      await notify({
+        userId: d.creator_user_id,
+        kind: 'dispute_reminder',
+        title: `A contributor is waiting for your answer: ${d.title}`,
+        body: 'A dispute is open on your bounty and you have not replied. Add your side with links so the mediator can decide fairly.',
+        link: `/disputes/${d.id}`,
+        dedupeKey: `nudge:dispute:${d.id}:${day}`,
+      })
+      counts.disputes += 1
     }
   }
 

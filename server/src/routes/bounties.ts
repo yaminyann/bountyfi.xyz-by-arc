@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { config } from '../config.js'
 import { query } from '../db.js'
 import { isAdminUser, optionalAuth, requireAuth, requireLinkedWallet, getLinkedWallet } from '../auth.js'
-import { assertLinksAllowed } from '../lib/links.js'
+import { assertLinksAllowed, urlsIn } from '../lib/links.js'
 import { assertCanPublish, checkEligibility, computeChecks } from '../services/trust.js'
 import { readBounty, readSubmissionHash } from '../chain.js'
 import { HttpError, clampInt, parse, parseOnchainId, queryString, route } from '../lib/http.js'
@@ -279,12 +279,8 @@ async function writeListing(rowId: string, d: Awaited<ReturnType<typeof resolveL
   listCache.invalidate()
 }
 
-const URL_IN_TEXT = /https?:\/\/[^\s<>"')]+/gi
-
 /** Links written inside the free-text listing fields get the same safety rules as the bounty's own links. */
-function linksInListing(d: { submissionInstructions: string | null; eligibility: string | null }): string[] {
-  return [...new Set([d.submissionInstructions ?? '', d.eligibility ?? ''].join(' ').match(URL_IN_TEXT) ?? [])].slice(0, 20)
-}
+const linksInListing = (d: { submissionInstructions: string | null; eligibility: string | null }): string[] => urlsIn(d.submissionInstructions, d.eligibility)
 
 // The creator can adjust how the bounty is listed (category, project, difficulty, team mode). The hashed text stays fixed.
 bountiesRouter.post(

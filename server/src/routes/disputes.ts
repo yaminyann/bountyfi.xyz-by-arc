@@ -5,6 +5,7 @@ import { adminEmail, getLinkedWallet, isAdminUser, requireAdmin, requireAuth, re
 import { HttpError, clampInt, isUuid, parse, route } from '../lib/http.js'
 import { rateLimit } from '../lib/limits.js'
 import { httpUrl } from '../lib/ecosystem.js'
+import { assertLinksAllowed, urlsIn } from '../lib/links.js'
 import { notify } from '../services/notify.js'
 
 /**
@@ -158,6 +159,7 @@ const CommentSchema = z.object({ body: z.string().trim().min(1).max(2_000), link
 async function addComment(req: Request, d: DisputeContext, role: Role, wallet: string | null) {
   const input = parse(CommentSchema, req.body)
   if (d.status !== 'open') throw new HttpError(409, 'This dispute is closed.')
+  await assertLinksAllowed([...input.links, ...urlsIn(input.body)], 'A link in the message')
   await query('INSERT INTO dispute_comments (dispute_id, author_user_id, author_wallet, author_role, body, links) VALUES ($1, $2, $3, $4, $5, $6)', [
     d.id,
     req.user!.id,

@@ -74,6 +74,13 @@ export async function assessLink(raw: string): Promise<LinkVerdict> {
 }
 
 /** Throws 422 for the first link that is blocked. Warnings pass: they are shown to readers instead. */
+const URL_IN_TEXT = /https?:\/\/[^\s<>"')]+/gi
+
+/** Addresses written inside free text, so they get the same rules as links that were typed into a link field. */
+export function urlsIn(...texts: (string | null | undefined)[]): string[] {
+  return [...new Set(texts.join(' ').match(URL_IN_TEXT) ?? [])].slice(0, 20)
+}
+
 export async function assertLinksAllowed(urls: (string | null | undefined)[], label: string): Promise<LinkVerdict[]> {
   const verdicts: LinkVerdict[] = []
   for (const url of urls) {
