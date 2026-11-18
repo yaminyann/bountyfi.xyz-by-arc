@@ -6,9 +6,18 @@ import http from 'node:http'
 export async function startFakes() {
   const hooks = []
   const onramp = []
+  const verify = { content: '' }
   const github = http.createServer((req, res) => {
     const m = /^\/repos\/[^/]+\/[^/]+\/pulls\/(\d+)$/.exec(req.url ?? '')
     res.setHeader('content-type', 'application/json')
+    if (/^\/repos\/acme\/dash\/contents\/\.bountyfi-verify$/.test(req.url ?? '')) {
+      if (!verify.content) {
+        res.statusCode = 404
+        return res.end('{}')
+      }
+      res.setHeader('content-type', 'text/plain')
+      return res.end(verify.content)
+    }
     if (!m) {
       res.statusCode = 404
       return res.end('{}')
@@ -41,7 +50,7 @@ export async function startFakes() {
   await new Promise((r) => circle.listen(9924, '127.0.0.1', r))
   await new Promise((r) => github.listen(9922, '127.0.0.1', r))
   await new Promise((r) => hook.listen(9923, '127.0.0.1', r))
-  return { hooks, onramp, close: () => Promise.all([new Promise((r) => github.close(r)), new Promise((r) => hook.close(r)), new Promise((r) => circle.close(r))]) }
+  return { hooks, onramp, verify, close: () => Promise.all([new Promise((r) => github.close(r)), new Promise((r) => hook.close(r)), new Promise((r) => circle.close(r))]) }
 }
 
 export async function runTrustChecks(ctx, fakes) {

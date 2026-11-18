@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { config } from '../config.js'
 import { query } from '../db.js'
 import { isAdminUser, optionalAuth, requireAuth, requireLinkedWallet, getLinkedWallet } from '../auth.js'
+import { assertLinksAllowed } from '../lib/links.js'
+import { assertCanPublish, checkEligibility, computeChecks } from '../services/trust.js'
 import { readBounty, readSubmissionHash } from '../chain.js'
 import { HttpError, clampInt, parse, parseOnchainId, queryString, route } from '../lib/http.js'
 import { TtlCache, rateLimit } from '../lib/limits.js'
@@ -227,6 +229,8 @@ bountiesRouter.post(
     const { onchainId, txHash, listing, ...meta } = parse(CreateBountySchema, req.body)
     const user = req.user!
     const wallet = req.wallet!
+    await assertCanPublish(user.id)
+    await assertLinksAllowed(meta.links, 'A link in the bounty')
     const details = listing ? await resolveListing(listing, user.id) : null
     if (details?.confidential) await requireEncryptionKey(user.id)
 
@@ -266,9 +270,10 @@ async function writeListing(rowId: string, d: Awaited<ReturnType<typeof resolveL
   await query(
     `UPDATE bounties
         SET category = $2, difficulty = $3, skills = $4, work_mode = $5, project_id = $6, recurring_program_id = $7,
-            submission_instructions = $8, eligibility = $9, confidential = $10, accepts_applications = $11, updated_at = NOW()
+            submission_instructions = $8, eligibility = $9, confidential = $10, accepts_applications = $11,
+            min_account_age_days = $12, require_github = $13, min_approved_submissions = $14, updated_at = NOW()
       WHERE id = $1`,
-    [rowId, d.category, d.difficulty, d.skills, d.workMode, d.projectId, d.recurringProgramId, d.submissionInstructions, d.eligibility, d.confidential, d.acceptsApplications],
+    [rowId, d.category, d.difficulty, d.skills, d.workMode, d.projectId, d.recurringProgramId, d.submissionInstructions, d.eligibility, d.confidential, d.acceptsApplications, d.minAccountAgeDays, d.requireGithub, d.minApprovedSubmissions],
   )
   listCache.invalidate()
 }
@@ -358,14 +363,31 @@ bountiesRouter.get(
     const projectLink = req.user && !reviewer ? await query<{ project_id: string | null }>('SELECT project_id FROM bounties WHERE id = $1', [bounty.id]) : null
     const memberRole = projectLink?.rows[0]?.project_id && req.user ? await projectRole(req.user.id, projectLink.rows[0].project_id) : null
     const staff = reviewer || memberRole !== null
-    const submissions = (rows.rows as Array<{ submitterWallet: string; reviewStatus: string | null; commentCount: number | null; description: string | null }>).map((row) => {
+    const submissions = (rows.rows as Array<{ submitterWallet: string; reviewStatus: string | null; commentCount: number | null; description: string | null; checks: unknown }>).map((row) => {
       const party = staff || (viewerWallet !== null && viewerWallet === row.submitterWallet)
       if (party) return row
       // Confidential reports are encrypted, and their ciphertext is shown only to the people who may open them.
-      return { ...row, reviewStatus: null, commentCount: null, description: confidential && row.description ? 'encrypted' : row.description }
+      return { ...row, reviewStatus: null, commentCount: null, checks: null, description: confidential && row.description ? 'encrypted' : row.description }
     })
     res.setHeader('Cache-Control', 'private, no-store')
     res.json({ submissions })
+  }),
+)
+
+/** Tells a contributor, before they send a transaction, whether their notes would be shown on this bounty. */
+bountiesRouter.get(
+  '/:id/eligibility',
+  requireAuth,
+  requireLinkedWallet,
+  route(async (req: Request, res: Response) => {
+    const id = parseOnchainId(req.params.id)
+    const found = await query<{ id: string; min_account_age_days: number; require_github: boolean; min_approved_submissions: number }>(
+      `SELECT id, min_account_age_days, require_github, min_approved_submissions FROM bounties WHERE onchain_id = $1 AND moderation_status = 'approved' AND metadata_verified`,
+      [id],
+    )
+    if (!found.rows[0]) throw new HttpError(404, 'Bounty not found')
+    res.setHeader('Cache-Control', 'private, no-store')
+    res.json(await checkEligibility(req.user!.id, req.wallet!, found.rows[0]))
   }),
 )
 
@@ -390,6 +412,13 @@ bountiesRouter.post(
     const bounty = await loadBountyRow(id)
     if (!bounty || bounty.moderationStatus !== 'approved') throw new HttpError(404, 'Bounty not found')
     if (bounty.creatorWallet === wallet) throw new HttpError(403, 'Creators cannot submit to their own bounty.')
+    const gate = await query<{ min_account_age_days: number; require_github: boolean; min_approved_submissions: number }>(
+      'SELECT min_account_age_days, require_github, min_approved_submissions FROM bounties WHERE id = $1',
+      [bounty.id],
+    )
+    const eligibility = await checkEligibility(user.id, wallet, gate.rows[0])
+    if (!eligibility.eligible) throw new HttpError(403, `Your notes cannot be shown on this bounty yet. ${eligibility.reasons.join(' ')}`)
+    await assertLinksAllowed([meta.pullRequestUrl, ...meta.attachments], 'A link in your submission')
     if (bounty.confidential === true && !meta.description.startsWith('enc:v1:')) {
       throw new HttpError(422, 'This bounty only accepts reports encrypted to the creator. Use the submit form so your report is encrypted in your browser.')
     }
@@ -400,9 +429,15 @@ bountiesRouter.post(
       throw new HttpError(422, 'Notes do not match the hash recorded on-chain.')
     }
 
+    const encrypted = meta.description.startsWith('enc:v1:')
+    const computed = await computeChecks({ bountyRowId: bounty.id, wallet, description: meta.description, pullRequestUrl: meta.pullRequestUrl ?? null, attachments: meta.attachments })
+    // Ciphertext cannot be read or compared, so an encrypted report gets only the checks that do not need its words.
+    const checks = encrypted ? { ...computed.checks, words: 0, duplicateOf: null } : computed.checks
+    const print = encrypted ? null : computed.print
+
     const saved = await query(
-      `INSERT INTO submissions (bounty_id, submitter_wallet, submitter_user_id, submission_hash, description, pull_request_url, attachments, notes_verified, tx_hash)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE, $8)
+      `INSERT INTO submissions (bounty_id, submitter_wallet, submitter_user_id, submission_hash, description, pull_request_url, attachments, notes_verified, tx_hash, checks, text_fingerprint)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE, $8, $9::jsonb, $10)
        ON CONFLICT (bounty_id, submitter_wallet) DO UPDATE SET
          submitter_user_id = EXCLUDED.submitter_user_id,
          submission_hash = EXCLUDED.submission_hash,
@@ -410,11 +445,13 @@ bountiesRouter.post(
          pull_request_url = EXCLUDED.pull_request_url,
          attachments = EXCLUDED.attachments,
          notes_verified = TRUE,
+         checks = EXCLUDED.checks,
+         text_fingerprint = EXCLUDED.text_fingerprint,
          tx_hash = COALESCE(submissions.tx_hash, EXCLUDED.tx_hash),
          updated_at = NOW()
        WHERE submissions.notes_verified = FALSE
        RETURNING id`,
-      [bounty.id, wallet, user.id, onchainHash, meta.description, meta.pullRequestUrl, [...new Set(meta.attachments)], txHash ?? null],
+      [bounty.id, wallet, user.id, onchainHash, meta.description, meta.pullRequestUrl, [...new Set(meta.attachments)], txHash ?? null, JSON.stringify(checks), print],
     )
     if (saved.rowCount === 0) throw new HttpError(409, 'Notes were already attached to this submission.')
 

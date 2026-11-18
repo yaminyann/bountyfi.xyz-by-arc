@@ -49,6 +49,25 @@ export async function fetchPullRequest(url: string): Promise<PullRequestCheck> {
   }
 }
 
+/** Reads a small text file from a repository (used to prove control of it). Returns null when the file does not exist. */
+export async function fetchRepoFile(owner: string, repo: string, path: string): Promise<string | null> {
+  const base = (process.env.GITHUB_API_URL || 'https://api.github.com').replace(/\/$/, '')
+  let res: Response
+  try {
+    res = await fetch(`${base}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeURIComponent(path)}`, {
+      headers: { Accept: 'application/vnd.github.raw+json', 'User-Agent': 'BountyFi-verify', 'X-GitHub-Api-Version': '2022-11-28' },
+      signal: AbortSignal.timeout(6_000),
+    })
+  } catch {
+    throw new GithubUnavailable('GitHub could not be reached. Try again in a moment.')
+  }
+  if (res.status === 404) return null
+  if (res.status === 403 || res.status === 429) throw new GithubUnavailable('GitHub is rate limiting checks right now. Try again later.')
+  if (!res.ok) throw new GithubUnavailable(`GitHub answered ${res.status}.`)
+  const text = await res.text()
+  return text.slice(0, 500)
+}
+
 /** Checks the pull request of a stored submission and saves the result. Returns null when the link is not a GitHub PR. */
 export async function checkSubmissionPr(submissionId: string, url: string | null): Promise<PullRequestCheck | null> {
   if (!url || !parsePullRequestUrl(url)) return null

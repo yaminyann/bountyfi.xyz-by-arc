@@ -11,6 +11,7 @@ import { indexerStatus } from '../services/indexer.js'
 import { BOUNTY_LIST_COLUMNS, toTsQuery } from '../services/projections.js'
 import { notify } from '../services/notify.js'
 import { notifySavedSearches } from '../services/alerts.js'
+import { runNudges } from '../services/nudges.js'
 import { describeEvent, emitProjectEvent } from '../services/webhooks.js'
 
 export const adminRouter = Router()
@@ -21,6 +22,14 @@ adminRouter.use((_req, res, next) => {
   res.setHeader('Cache-Control', 'private, no-store')
   next()
 })
+
+/** Runs the review and claim reminders now. They also run by themselves every hour. */
+adminRouter.post(
+  '/jobs/nudges',
+  route(async (_req: Request, res: Response) => {
+    res.json(await runNudges())
+  }),
+)
 
 adminRouter.get(
   '/me',

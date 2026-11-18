@@ -16,6 +16,7 @@ const listCache = new TtlCache<{ items: unknown[]; total: number }>(5_000)
 const PROJECT_COLUMNS = `
   p.id, p.slug, p.name, p.tagline, p.description, p.website_url AS "websiteUrl", p.github_url AS "githubUrl",
   p.logo_url AS "logoUrl", p.owner_wallet AS "ownerWallet", p.status, p.created_at AS "createdAt",
+  (p.verified_at IS NOT NULL) AS verified, p.verified_by AS "verifiedBy",
   u.display_name AS "ownerName", u.photo_url AS "ownerPhoto"`
 
 /** Numbers shown on cards and the contribution board. Everything is derived from approved bounties and indexed chain events. */
@@ -266,7 +267,11 @@ projectsRouter.post(
     const target = await query<{ id: string }>('SELECT id FROM projects WHERE slug = $1', [slug])
     if (!target.rows[0] || !canManageProject(await projectRole(req.user!.id, target.rows[0].id))) throw new HttpError(403, 'Only the project owner or a manager can edit it.')
     await query(
-      `UPDATE projects SET name = $2, tagline = $3, description = $4, website_url = $5, github_url = $6, logo_url = $7, updated_at = NOW() WHERE id = $1`,
+      // A new GitHub address has not been proven yet, so the badge is removed until it is verified again.
+      `UPDATE projects SET name = $2, tagline = $3, description = $4, website_url = $5,
+         verified_at = CASE WHEN github_url IS DISTINCT FROM $6 THEN NULL ELSE verified_at END,
+         verified_by = CASE WHEN github_url IS DISTINCT FROM $6 THEN NULL ELSE verified_by END,
+         github_url = $6, logo_url = $7, updated_at = NOW() WHERE id = $1`,
       [target.rows[0].id, body.name, body.tagline, body.description, body.websiteUrl, body.githubUrl, body.logoUrl],
     )
     listCache.invalidate()

@@ -22,6 +22,10 @@ import { applicationsRouter } from './routes/applications.js'
 import { adminDisputesRouter, disputesRouter } from './routes/disputes.js'
 import { leaderboardRouter, projectInsightsRouter } from './routes/insights.js'
 import { onrampRouter } from './routes/onramp.js'
+import { adminDomainsRouter, adminReportsRouter, linksRouter, reportsRouter } from './routes/safety.js'
+import { savedRouter } from './routes/saved.js'
+import { verificationRouter } from './routes/verification.js'
+import { startNudges } from './services/nudges.js'
 import { startIndexer } from './services/indexer.js'
 
 const app = express()
@@ -84,9 +88,13 @@ app.use('/api/me/profile', myProfileRouter)
 app.use('/api/me/encryption-key', encryptionRouter)
 app.use('/api/me/saved-searches', alertsRouter)
 app.use('/api/me/onramp', onrampRouter)
+app.use('/api/me/saved', savedRouter)
 app.use('/api/me', meRouter)
 app.use('/api/reviews', reviewsRouter)
+app.use('/api/projects', verificationRouter)
 app.use('/api/projects', projectsRouter)
+app.use('/api/reports', reportsRouter)
+app.use('/api/links', linksRouter)
 app.use('/api/projects', projectInsightsRouter)
 app.use('/api/recurring', recurringRouter)
 app.use('/api/profiles', profilesRouter)
@@ -97,6 +105,8 @@ app.use('/api/leaderboard', leaderboardRouter)
 app.use('/api/submissions', submissionsRouter)
 app.use('/api/badge', badgeRouter)
 app.use('/api/admin/disputes', adminDisputesRouter)
+app.use('/api/admin/reports', adminReportsRouter)
+app.use('/api/admin/blocked-domains', adminDomainsRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api', publicRouter)
 
@@ -127,6 +137,7 @@ async function initialize(): Promise<void> {
       await pool.query('SELECT 1')
       await runMigrations()
       startIndexer()
+      startNudges()
       state.ready = true
       state.lastError = null
       console.log('[BountyFi] Database ready')

@@ -48,6 +48,10 @@ export const ListingSchema = z.object({
   eligibility: z.string().trim().max(1_000).nullish(),
   confidential: z.boolean().default(false),
   acceptsApplications: z.boolean().default(false),
+  /** Who may have notes shown on this bounty. The contract cannot refuse a submission, so unverified accounts stay hidden. */
+  minAccountAgeDays: z.number().int().min(0).max(365).default(0),
+  requireGithub: z.boolean().default(false),
+  minApprovedSubmissions: z.number().int().min(0).max(50).default(0),
 })
 export type Listing = z.infer<typeof ListingSchema>
 
@@ -115,6 +119,9 @@ export async function resolveListing(
   eligibility: string | null
   confidential: boolean
   acceptsApplications: boolean
+  minAccountAgeDays: number
+  requireGithub: boolean
+  minApprovedSubmissions: number
 }> {
   let category: string | null = null
   if (listing.category) {
@@ -158,6 +165,9 @@ export async function resolveListing(
     eligibility: listing.eligibility || null,
     confidential: listing.confidential,
     acceptsApplications: listing.acceptsApplications,
+    minAccountAgeDays: listing.minAccountAgeDays,
+    requireGithub: listing.requireGithub,
+    minApprovedSubmissions: listing.minApprovedSubmissions,
   }
 }
 

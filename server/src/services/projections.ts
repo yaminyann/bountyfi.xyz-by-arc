@@ -23,6 +23,10 @@ export const BOUNTY_LIST_COLUMNS = `
   b.work_mode AS "workMode",
   b.confidential,
   b.accepts_applications AS "acceptsApplications",
+  b.min_account_age_days AS "minAccountAgeDays",
+  b.require_github AS "requireGithub",
+  b.min_approved_submissions AS "minApprovedSubmissions",
+  (SELECT p.verified_at IS NOT NULL FROM projects p WHERE p.id = b.project_id) AS "projectVerified",
   (SELECT COUNT(*)::int FROM bounty_applications a WHERE a.bounty_id = b.id AND a.status = 'approved') AS "assignedCount",
   (SELECT p.slug FROM projects p WHERE p.id = b.project_id) AS "projectSlug",
   (SELECT p.name FROM projects p WHERE p.id = b.project_id) AS "projectName",
@@ -75,6 +79,7 @@ export const SUBMISSION_COLUMNS = `
   s.pr_author AS "prAuthor",
   s.pr_title AS "prTitle",
   s.pr_checked_at AS "prCheckedAt",
+  s.checks,
   (s.pr_author IS NOT NULL AND EXISTS (
      SELECT 1 FROM contributor_profiles cp
       WHERE cp.user_id = COALESCE(s.submitter_user_id, (SELECT user_id FROM wallets WHERE address = s.submitter_wallet))

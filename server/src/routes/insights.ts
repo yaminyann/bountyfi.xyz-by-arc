@@ -157,7 +157,12 @@ leaderboardRouter.get(
     const limit = clampInt(req.query.limit, 25, 1, 100)
     const items = await cache.get(JSON.stringify([period, category, limit]), async () => {
       const params: unknown[] = []
-      let where = `a.kind = 'claimed' AND ${PUBLIC_BOUNTY} AND NOT COALESCE(cp.hide_from_leaderboard, FALSE)`
+      // A prize is left out when its winner also funded a bounty that the creator then won: two wallets paying each
+      // other is trading, not work. The claims stay visible everywhere else; they just do not rank.
+      let where = `a.kind = 'claimed' AND ${PUBLIC_BOUNTY} AND NOT COALESCE(cp.hide_from_leaderboard, FALSE)
+        AND NOT EXISTS (
+          SELECT 1 FROM bounty_activity a2 JOIN bounties b2 ON b2.id = a2.bounty_id
+           WHERE a2.kind = 'claimed' AND a2.actor_wallet = b.creator_wallet AND b2.creator_wallet = a.actor_wallet)`
       if (period > 0) {
         params.push(period)
         where += ` AND a.block_time >= NOW() - ($${params.length}::int * INTERVAL '1 day')`
@@ -169,7 +174,7 @@ leaderboardRouter.get(
       params.push(limit)
       const rows = await query(
         `SELECT a.actor_wallet AS wallet, MAX(COALESCE(cp.display_name, u.display_name)) AS name, MAX(COALESCE(cp.avatar_url, u.photo_url)) AS photo,
-                SUM(a.amount - COALESCE(a.fee, 0))::text AS earned, COUNT(*)::int AS claims
+                SUM(a.amount - COALESCE(a.fee, 0))::text AS earned, COUNT(*)::int AS claims, COUNT(DISTINCT b.creator_wallet)::int AS creators
            FROM bounty_activity a
            JOIN bounties b ON b.id = a.bounty_id
            LEFT JOIN wallets w ON w.address = a.actor_wallet AND w.verified

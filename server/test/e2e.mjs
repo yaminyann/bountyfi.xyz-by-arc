@@ -18,6 +18,7 @@ import { runEcosystemChecks } from './ecosystem.mjs'
 import { runTrustChecks, startFakes } from './trust.mjs'
 import { runInsightChecks } from './insights.mjs'
 import { runSectorChecks } from './sectors.mjs'
+import { runTrustControlChecks } from './trustcontrols.mjs'
 import { createPublicClient, createWalletClient, http as viemHttp, defineChain } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
@@ -163,6 +164,9 @@ const server = spawn('node', ['server/dist/index.js'], {
     INDEXER_START_BLOCK: String(boardReceipt.blockNumber),
     INDEXER_POLL_MS: '700',
     GITHUB_API_URL: 'http://127.0.0.1:9922',
+    TRUST_NEW_ACCOUNT_HOURS: '0',
+    TRUST_BOUNTIES_PER_DAY: '120',
+    TRUST_SUBMISSIONS_PER_DAY: '120',
     ONRAMP_API_KEY: 'TEST_API_KEY:fake-key-id:fake-key-secret',
     ONRAMP_API_URL: 'http://127.0.0.1:9924',
     ALERT_WEBHOOK_HOSTS: '127.0.0.1',
@@ -424,6 +428,7 @@ try {
   await runTrustChecks({ api, tok, accounts, send, board, boardArtifact, usdc, mock, bountyCommitment, submissionCommitment, check, waitFor, db, apiBase: API }, fakes)
   await runInsightChecks({ api, tok, accounts, send, board, boardArtifact, usdc, mock, bountyCommitment, submissionCommitment, check, waitFor, db, apiBase: API }, fakes)
   await runSectorChecks({ api, tok, accounts, send, read, board, boardArtifact, usdc, mock, bountyCommitment, submissionCommitment, check, waitFor, db })
+  await runTrustControlChecks({ api, tok, accounts, send, read, board, boardArtifact, usdc, mock, bountyCommitment, submissionCommitment, check, waitFor, db, databaseUrl: DATABASE_URL }, fakes)
 } catch (err) {
   failures += 1
   console.error('\nE2E aborted:', err)
