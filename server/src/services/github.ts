@@ -78,3 +78,68 @@ export async function checkSubmissionPr(submissionId: string, url: string | null
   )
   return result
 }
+
+const ISSUE_URL = /^https:\/\/(?:www\.)?github\.com\/([A-Za-z0-9_.-]{1,100})\/([A-Za-z0-9_.-]{1,100})\/issues\/(\d{1,9})(?:[/?#].*)?$/
+
+export function parseIssueUrl(url: string): { owner: string; repo: string; number: number } | null {
+  const match = ISSUE_URL.exec(url.trim())
+  return match ? { owner: match[1], repo: match[2], number: Number(match[3]) } : null
+}
+
+export interface IssueDraft {
+  url: string
+  repository: string
+  number: number
+  state: 'open' | 'closed'
+  title: string
+  body: string
+  labels: string[]
+  author: string | null
+}
+
+/**
+ * Reads a public issue so a creator can start a bounty from it. Only github.com/<owner>/<repo>/issues/<n> links are
+ * fetched. What comes back is the issue author's text, not BountyFi's: the browser puts it in the form for the creator
+ * to read and edit, and the usual link rules apply when the bounty is published.
+ */
+export async function fetchIssue(url: string): Promise<IssueDraft | null> {
+  const issue = parseIssueUrl(url)
+  if (!issue) throw new Error('Not a GitHub issue link')
+  const base = (process.env.GITHUB_API_URL || 'https://api.github.com').replace(/\/$/, '')
+  let res: Response
+  try {
+    res = await fetch(`${base}/repos/${issue.owner}/${issue.repo}/issues/${issue.number}`, {
+      headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'BountyFi-issue-import', 'X-GitHub-Api-Version': '2022-11-28' },
+      signal: AbortSignal.timeout(6_000),
+    })
+  } catch {
+    throw new GithubUnavailable('GitHub could not be reached. Try again in a moment.')
+  }
+  if (res.status === 404) return null
+  if (res.status === 403 || res.status === 429) throw new GithubUnavailable('GitHub is rate limiting requests right now. Try again later.')
+  if (!res.ok) throw new GithubUnavailable(`GitHub answered ${res.status}.`)
+
+  const body = (await res.json()) as { title?: string; body?: string | null; state?: string; pull_request?: unknown; labels?: (string | { name?: string })[]; user?: { login?: string } }
+  if (body.pull_request) return null
+  const text = (body.body ?? '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+    .slice(0, 4000)
+  const labels = (body.labels ?? [])
+    .map((l) => (typeof l === 'string' ? l : (l.name ?? '')))
+    .map((l) => l.toLowerCase().replace(/[^a-z0-9+#.\- ]/g, '').trim().slice(0, 30))
+    .filter(Boolean)
+    .slice(0, 8)
+  return {
+    url: `https://github.com/${issue.owner}/${issue.repo}/issues/${issue.number}`,
+    repository: `${issue.owner}/${issue.repo}`,
+    number: issue.number,
+    state: body.state === 'closed' ? 'closed' : 'open',
+    title: (body.title ?? '').slice(0, 200),
+    body: text,
+    labels,
+    author: body.user?.login?.slice(0, 80) ?? null,
+  }
+}

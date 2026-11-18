@@ -4,6 +4,7 @@ import { parseEventLogs } from 'viem'
 import { Check, CircleAlert } from 'lucide-react'
 import { RequireIdentity } from '@/components/layout/RequireIdentity'
 import { FeeLedger } from '@/components/bounty/FeeLedger'
+import { ImportIssue } from '@/features/bounty/ImportIssue'
 import { EMPTY_LISTING, ListingFields, toListingInput, type ListingForm } from '@/features/bounty/ListingFields'
 import { PrizeStructureEditor } from '@/components/bounty/PrizeStructureEditor'
 import { Button, ButtonLink } from '@/components/ui/Button'
@@ -287,6 +288,33 @@ export default function CreateBounty() {
         >
           <fieldset className="space-y-5" disabled={locked}>
             <legend className="mb-4 font-display text-lg font-semibold">The work</legend>
+            <ImportIssue
+              disabled={locked}
+              onImport={(issue) => {
+                const filled: string[] = []
+                setForm((f) => {
+                  const next = { ...f }
+                  if (!f.title.trim() && issue.title) {
+                    next.title = issue.title
+                    filled.push('title')
+                  }
+                  if (!f.description.trim()) {
+                    next.description = (issue.body || `See the linked issue: ${issue.url}`).slice(0, 10000)
+                    filled.push('description')
+                  }
+                  if (!splitLines(f.links).includes(issue.url)) {
+                    next.links = [f.links.trim(), issue.url].filter(Boolean).join('\n')
+                    filled.push('link')
+                  }
+                  if (!f.tags.trim() && issue.labels.length > 0) {
+                    next.tags = issue.labels.join(', ')
+                    filled.push('tags')
+                  }
+                  return next
+                })
+                return filled
+              }}
+            />
             <Field label="Title" error={errors.title} hint="Say what needs to be done, not who you are.">
               <Input value={view.title} maxLength={200} onChange={(e) => set('title', e.target.value)} placeholder="Translate the onboarding guide into Spanish" />
             </Field>

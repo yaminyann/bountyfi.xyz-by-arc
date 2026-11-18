@@ -25,6 +25,7 @@ import { onrampRouter } from './routes/onramp.js'
 import { adminDomainsRouter, adminReportsRouter, linksRouter, reportsRouter } from './routes/safety.js'
 import { savedRouter } from './routes/saved.js'
 import { verificationRouter } from './routes/verification.js'
+import { githubRouter } from './routes/github.js'
 import { startNudges } from './services/nudges.js'
 import { startIndexer } from './services/indexer.js'
 
@@ -95,6 +96,7 @@ app.use('/api/projects', verificationRouter)
 app.use('/api/projects', projectsRouter)
 app.use('/api/reports', reportsRouter)
 app.use('/api/links', linksRouter)
+app.use('/api/github', githubRouter)
 app.use('/api/projects', projectInsightsRouter)
 app.use('/api/recurring', recurringRouter)
 app.use('/api/profiles', profilesRouter)

@@ -24,7 +24,7 @@ export function ReviewDialog({ bounty, onClose }: { bounty: AdminBounty | null; 
     setError(null)
     try {
       await moderate.mutateAsync({ onchainId: bounty.onchainId, decision, note: note.trim() || undefined })
-      toast.success(decision === 'approved' ? 'Approved. It is now public.' : decision === 'rejected' ? 'Rejected. It is hidden.' : 'Moved back to the review queue.')
+      toast.success(decision === 'approved' ? (bounty.moderationStatus === 'approved' ? 'Kept approved.' : 'Approved. It is now public.') : decision === 'rejected' ? 'Rejected. It is hidden.' : 'Moved back to the review queue.')
       setNote('')
       onClose()
     } catch (err) {
@@ -56,6 +56,11 @@ export function ReviewDialog({ bounty, onClose }: { bounty: AdminBounty | null; 
                 Reject
               </Button>
             )}
+            {bounty.moderationStatus === 'approved' && bounty.listingEditedAt && (
+              <Button variant="primary" loading={moderate.isPending} onClick={() => void decide('approved')}>
+                The edit is fine
+              </Button>
+            )}
             {bounty.moderationStatus !== 'approved' && (
               <Button variant="primary" loading={moderate.isPending} disabled={!bounty.metadataVerified || !funded} onClick={() => void decide('approved')}>
                 Approve and publish
@@ -73,6 +78,11 @@ export function ReviewDialog({ bounty, onClose }: { bounty: AdminBounty | null; 
             <span className="num text-sm font-semibold">{formatUsdc(bounty.rewardAmount)} USDC</span>
           </div>
 
+          {bounty.listingEditedAt && (
+            <Callout tone="warn" title="Edited after approval">
+              The creator changed the submission instructions or eligibility on {formatDate(bounty.listingEditedAt, true)}. The bounty is still public. Read the new text below and keep it, or move it back to the queue or reject it.
+            </Callout>
+          )}
           {!bounty.metadataVerified && <Callout tone="warn" title="Description not published">The creator created this on-chain but never attached the text, so it cannot be approved.</Callout>}
           {bounty.metadataVerified && !funded && <Callout tone="warn" title="Not funded">The prize is not in escrow yet, so it cannot be approved.</Callout>}
 
@@ -100,6 +110,18 @@ export function ReviewDialog({ bounty, onClose }: { bounty: AdminBounty | null; 
             <div className="space-y-1">
               <h3 className="font-display font-semibold">How a fix is judged</h3>
               <p className="prose-plain text-sm">{bounty.acceptanceCriteria}</p>
+            </div>
+          )}
+          {bounty.submissionInstructions && (
+            <div className="space-y-1">
+              <h3 className="font-display font-semibold">Submission instructions</h3>
+              <p className="prose-plain text-sm">{bounty.submissionInstructions}</p>
+            </div>
+          )}
+          {bounty.eligibility && (
+            <div className="space-y-1">
+              <h3 className="font-display font-semibold">Eligibility</h3>
+              <p className="prose-plain text-sm">{bounty.eligibility}</p>
             </div>
           )}
           {bounty.links.length > 0 && (

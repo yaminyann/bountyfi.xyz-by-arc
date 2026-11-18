@@ -9,7 +9,12 @@ export async function startFakes() {
   const verify = { content: '' }
   const github = http.createServer((req, res) => {
     const m = /^\/repos\/[^/]+\/[^/]+\/pulls\/(\d+)$/.exec(req.url ?? '')
+    const issue = /^\/repos\/acme\/dash\/issues\/(\d+)$/.exec(req.url ?? '')
     res.setHeader('content-type', 'application/json')
+    if (issue) {
+      if (issue[1] === '12') return res.end(JSON.stringify({ title: 'Export button does nothing on Safari', state: 'open', user: { login: 'maintainer-m' }, labels: [{ name: 'Bug' }, { name: 'good first issue' }, 'Safari!'], body: '<!-- template note -->Clicking Export on Safari 17 does nothing.\r\n\r\n\r\n\r\nSteps: open the table and press Export.' }))
+      if (issue[1] === '13') return res.end(JSON.stringify({ title: 'A pull request', state: 'open', pull_request: { url: 'x' }, body: 'x' }))
+    }
     if (/^\/repos\/acme\/dash\/contents\/\.bountyfi-verify$/.test(req.url ?? '')) {
       if (!verify.content) {
         res.statusCode = 404

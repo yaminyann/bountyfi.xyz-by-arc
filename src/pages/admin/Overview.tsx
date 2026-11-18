@@ -145,7 +145,7 @@ export default function Overview() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi icon={ClipboardCheck} label="Waiting for review" value={String(o.moderation.pending)} to="/admin/review" attention={o.moderation.pending > 0} hint="Funded and published by their creators" />
-        <Kpi icon={BadgeCheck} label="Approved and public" value={String(o.moderation.approved)} to="/admin/bounties" hint={`${o.moderation.rejected} rejected, ${o.moderation.unpublished} not published`} />
+        <Kpi icon={BadgeCheck} label="Approved and public" value={String(o.moderation.approved)} to="/admin/bounties" hint={`${o.moderation.edited} edited since approval, ${o.moderation.rejected} rejected, ${o.moderation.unpublished} not published`} />
         <Kpi icon={Users} label="Users" value={String(o.people.users)} to="/admin/users" hint={`${o.people.new7d} new in the last 7 days`} />
         <Kpi icon={Coins} label="Fees collected" value={formatUsdc(o.revenue.total, 2)} unit="USDC" to="/admin/revenue" hint={`${formatUsdc(o.revenue.week, 2)} USDC in the last 7 days`} />
       </div>

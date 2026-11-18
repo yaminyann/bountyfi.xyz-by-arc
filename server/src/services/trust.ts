@@ -131,7 +131,7 @@ export async function computeChecks(input: { bountyRowId: string; wallet: string
   const urls = [input.pullRequestUrl, ...input.attachments].filter((u): u is string => Boolean(u))
   const links = await Promise.all(urls.map((u) => assessLink(u)))
 
-  // Exact copies across any task, then near copies among this person's recent work and this task's other submissions.
+  // Exact copies across any task, then near copies among this task's other submissions, this person's work and anyone's recent work.
   let duplicateOf: SubmissionChecks['duplicateOf'] = null
   const exact = await query<{ onchain_id: number; wallet: string }>(
     `SELECT b.onchain_id::int AS onchain_id, s.submitter_wallet AS wallet FROM submissions s JOIN bounties b ON b.id = s.bounty_id
@@ -143,8 +143,8 @@ export async function computeChecks(input: { bountyRowId: string; wallet: string
     const others = await query<{ description: string; onchain_id: number; wallet: string }>(
       `SELECT s.description, b.onchain_id::int AS onchain_id, s.submitter_wallet AS wallet FROM submissions s JOIN bounties b ON b.id = s.bounty_id
         WHERE s.description IS NOT NULL AND NOT (s.bounty_id = $1 AND s.submitter_wallet = $2)
-          AND (s.bounty_id = $1 OR s.submitter_wallet = $2)
-        ORDER BY s.created_at DESC LIMIT 40`,
+          AND (s.bounty_id = $1 OR s.submitter_wallet = $2 OR s.created_at > NOW() - INTERVAL '45 days')
+        ORDER BY (s.bounty_id = $1) DESC, s.created_at DESC LIMIT 150`,
       [input.bountyRowId, input.wallet],
     )
     for (const o of others.rows) {

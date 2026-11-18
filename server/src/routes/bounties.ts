@@ -232,6 +232,7 @@ bountiesRouter.post(
     await assertCanPublish(user.id)
     await assertLinksAllowed(meta.links, 'A link in the bounty')
     const details = listing ? await resolveListing(listing, user.id) : null
+    if (details) await assertLinksAllowed(linksInListing(details), 'A link in the listing')
     if (details?.confidential) await requireEncryptionKey(user.id)
 
     const chain = await readBounty(onchainId)
@@ -278,6 +279,13 @@ async function writeListing(rowId: string, d: Awaited<ReturnType<typeof resolveL
   listCache.invalidate()
 }
 
+const URL_IN_TEXT = /https?:\/\/[^\s<>"')]+/gi
+
+/** Links written inside the free-text listing fields get the same safety rules as the bounty's own links. */
+function linksInListing(d: { submissionInstructions: string | null; eligibility: string | null }): string[] {
+  return [...new Set([d.submissionInstructions ?? '', d.eligibility ?? ''].join(' ').match(URL_IN_TEXT) ?? [])].slice(0, 20)
+}
+
 // The creator can adjust how the bounty is listed (category, project, difficulty, team mode). The hashed text stays fixed.
 bountiesRouter.post(
   '/:id/listing',
@@ -294,13 +302,22 @@ bountiesRouter.post(
       if ((members.rowCount ?? 0) > 0) throw new HttpError(409, 'Remove the team members before switching back to a solo bounty.')
     }
     const resolved = await resolveListing(listing, req.user!.id)
+    await assertLinksAllowed(linksInListing(resolved), 'A link in the listing')
     if (resolved.confidential) await requireEncryptionKey(req.user!.id)
-    const current = await query<{ confidential: boolean; submission_count: number }>('SELECT confidential, submission_count FROM bounties WHERE id = $1', [bounty.id])
+    const current = await query<{ confidential: boolean; submission_count: number; submission_instructions: string | null; eligibility: string | null; moderation_status: string }>(
+      'SELECT confidential, submission_count, submission_instructions, eligibility, moderation_status FROM bounties WHERE id = $1',
+      [bounty.id],
+    )
     if (current.rows[0] && current.rows[0].confidential !== resolved.confidential && current.rows[0].submission_count > 0) {
       throw new HttpError(409, 'Encrypted reports cannot be switched on or off after the first submission.')
     }
     await writeListing(bounty.id, resolved)
-    res.json({ ok: true })
+    // New wording on a bounty an admin already approved is flagged for another look. It stays public meanwhile.
+    const row = current.rows[0]
+    const wordingChanged = row && ((row.submission_instructions ?? '') !== (resolved.submissionInstructions ?? '') || (row.eligibility ?? '') !== (resolved.eligibility ?? ''))
+    const flagged = Boolean(wordingChanged && row.moderation_status === 'approved')
+    if (flagged) await query('UPDATE bounties SET listing_edited_at = NOW() WHERE id = $1', [bounty.id])
+    res.json({ ok: true, flaggedForReview: flagged })
   }),
 )
 

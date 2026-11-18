@@ -164,3 +164,18 @@ export function useUnblockDomain() {
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['admin', 'domains'] }),
   })
 }
+
+// ---- GitHub issue import -------------------------------------------------------------------------------------------
+
+export interface IssueDraft {
+  url: string
+  repository: string
+  number: number
+  state: 'open' | 'closed'
+  title: string
+  body: string
+  labels: string[]
+  author: string | null
+}
+
+export const importIssue = (url: string) => get<{ issue: IssueDraft }>(`/github/issue${toQuery({ url })}`).then((r) => r.issue)

@@ -57,7 +57,15 @@ export function AdminBounties({ mode }: { mode: 'queue' | 'all' }) {
     { header: 'Chain state', cell: (b) => <StatusBadge status={b.status} deadline={b.deadline} /> },
     {
       header: 'Review',
-      cell: (b) => (b.metadataVerified ? <ModerationBadge status={b.moderationStatus} /> : <span className="text-xs text-mute">Not published</span>),
+      cell: (b) =>
+        b.metadataVerified ? (
+          <span className="flex flex-wrap items-center gap-1.5">
+            <ModerationBadge status={b.moderationStatus} />
+            {b.listingEditedAt && <span className="text-xs font-medium text-warn">Edited</span>}
+          </span>
+        ) : (
+          <span className="text-xs text-mute">Not published</span>
+        ),
     },
     {
       header: 'Action',
@@ -88,6 +96,7 @@ export function AdminBounties({ mode }: { mode: 'queue' | 'all' }) {
                 <option value="all">Any review state</option>
                 <option value="pending">Waiting for review</option>
                 <option value="approved">Approved</option>
+                <option value="edited">Edited after approval</option>
                 <option value="rejected">Rejected</option>
                 <option value="unpublished">Not published</option>
               </Select>

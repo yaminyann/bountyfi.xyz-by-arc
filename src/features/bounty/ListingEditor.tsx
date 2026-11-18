@@ -35,8 +35,8 @@ export function ListingEditor({ bounty, onClose }: { bounty: BountyDetail; onClo
   const save = async () => {
     setError(null)
     try {
-      await update.mutateAsync({ onchainId: bounty.onchainId, ...toListingInput(form) })
-      toast.success('Listing details saved.')
+      const res = (await update.mutateAsync({ onchainId: bounty.onchainId, ...toListingInput(form) })) as { flaggedForReview?: boolean } | undefined
+      toast.success(res?.flaggedForReview ? 'Saved. Because you changed the wording, an admin will look at it again. It stays public meanwhile.' : 'Listing details saved.')
       onClose()
     } catch (err) {
       setError(errorMessage(err))

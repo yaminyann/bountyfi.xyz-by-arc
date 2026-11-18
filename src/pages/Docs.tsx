@@ -267,6 +267,8 @@ function useSections(): DocSection[] {
             <li>Turn on encrypted reports when the deliverable is sensitive.</li>
             <li>Set a deadline you can honour: after it, you have 7 days to review before you can take the prize back.</li>
           </Ul>
+          <H3>Start from a GitHub issue</H3>
+          <P>On the create form, paste the address of a public GitHub issue and BountyFi reads it from github.com. It fills the title, description, link and tags where they are still empty. The text is the issue author's, so read it and edit it before you post.</P>
           <H3>Guide: post and take your first task</H3>
           <Ol>
             <li>Posting: open Post a bounty from your workspace, choose the kind of work, write the criteria and the proof you need, set the prize and the places, then fund it. An admin approves it before it is listed.</li>
@@ -330,7 +332,11 @@ function useSections(): DocSection[] {
           </P>
           <H3>Checks on every submission</H3>
           <P>
-            Each submission shows the result of automatic checks next to it: whether the notes match the hash, how many words they hold, whether proof was given, how each link was rated, and whether the text looks copied from another submission. These are signals for the reviewer. They never pick a winner.
+            Each submission shows the result of automatic checks next to it: whether the notes match the hash, how many words they hold, whether proof was given, how each link was rated, and whether the text looks copied from this task's other submissions, from the same person's work, or from anyone's recent work. These are signals for the reviewer. They never pick a winner.
+          </P>
+          <H3>Edits after approval</H3>
+          <P>
+            The text that is hashed on-chain cannot change. The listing details beside it can, such as the submission instructions and eligibility. If a creator changes that wording after an admin approved the bounty, it stays public and is flagged so an admin looks at the new text again. Links in that wording follow the same safety rules as every other link.
           </P>
           <H3>Who can submit</H3>
           <P>

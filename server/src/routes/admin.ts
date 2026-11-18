@@ -54,6 +54,7 @@ adminRouter.get(
           `SELECT
              COUNT(*) FILTER (WHERE metadata_verified AND moderation_status = 'pending')::int AS pending,
              COUNT(*) FILTER (WHERE moderation_status = 'approved')::int AS approved,
+             COUNT(*) FILTER (WHERE moderation_status = 'approved' AND listing_edited_at IS NOT NULL)::int AS edited,
              COUNT(*) FILTER (WHERE moderation_status = 'rejected')::int AS rejected,
              COUNT(*) FILTER (WHERE NOT metadata_verified)::int AS unpublished
            FROM bounties`,
@@ -132,6 +133,8 @@ adminRouter.get(
 
     if (moderation === 'unpublished') {
       where.push('NOT b.metadata_verified')
+    } else if (moderation === 'edited') {
+      where.push(`b.moderation_status = 'approved' AND b.metadata_verified AND b.listing_edited_at IS NOT NULL`)
     } else if (moderation !== 'all') {
       if (!['pending', 'approved', 'rejected'].includes(moderation)) throw new HttpError(400, 'Invalid moderation filter')
       params.push(moderation)
@@ -158,13 +161,13 @@ adminRouter.get(
       `SELECT ${BOUNTY_LIST_COLUMNS},
               b.description, b.acceptance_criteria AS "acceptanceCriteria", b.links, b.content_hash AS "contentHash",
               b.metadata_verified AS "metadataVerified", b.moderation_note AS "moderationNote",
-              b.moderated_by AS "moderatedBy", b.moderated_at AS "moderatedAt", b.tx_hash AS "txHash",
+              b.moderated_by AS "moderatedBy", b.moderated_at AS "moderatedAt", b.tx_hash AS "txHash", b.listing_edited_at AS "listingEditedAt", b.submission_instructions AS "submissionInstructions", b.eligibility,
               u.email AS "creatorEmail", u.display_name AS "creatorName",
               COUNT(*) OVER()::text AS total
          FROM bounties b
          LEFT JOIN users u ON u.id = b.creator_user_id
         ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
-        ORDER BY ${moderation === 'pending' ? 'b.created_at ASC' : 'b.created_at DESC'}
+        ORDER BY ${moderation === 'pending' ? 'b.created_at ASC' : moderation === 'edited' ? 'b.listing_edited_at ASC' : 'b.created_at DESC'}
         LIMIT $${params.length - 1} OFFSET $${params.length}`,
       params,
     )
@@ -203,7 +206,7 @@ adminRouter.post(
     const email = adminEmail(req)
     await query(
       `UPDATE bounties
-          SET moderation_status = $2, moderated_by = $3, moderated_at = NOW(), moderation_note = $4, updated_at = NOW()
+          SET moderation_status = $2, moderated_by = $3, moderated_at = NOW(), moderation_note = $4, listing_edited_at = NULL, updated_at = NOW()
         WHERE id = $1`,
       [bounty.id, decision, email, note ?? null],
     )
@@ -213,7 +216,8 @@ adminRouter.post(
       [email, `moderation.${decision}`, String(onchainId), JSON.stringify({ from: bounty.moderation_status, note: note ?? null })],
     )
 
-    if (decision !== 'pending') {
+    const alreadyLive = bounty.moderation_status === 'approved' && decision === 'approved'
+    if (decision !== 'pending' && !alreadyLive) {
       const owner = await query<{ creator_user_id: string | null; title: string }>('SELECT creator_user_id, title FROM bounties WHERE id = $1', [bounty.id])
       await notify({
         userId: owner.rows[0]?.creator_user_id,
@@ -224,7 +228,7 @@ adminRouter.post(
       })
     }
 
-    if (decision === 'approved') {
+    if (decision === 'approved' && !alreadyLive) {
       void notifySavedSearches(bounty.id)
       const live = await query<{ title: string; reward_amount: string }>('SELECT title, reward_amount::text AS reward_amount FROM bounties WHERE id = $1', [bounty.id])
       if (live.rows[0]) void emitProjectEvent(bounty.id, 'bounty_live', describeEvent('bounty_live', live.rows[0].title, onchainId, { amount: live.rows[0].reward_amount }))

@@ -199,7 +199,7 @@ export interface MySummary {
 // --- admin ---------------------------------------------------------------------
 
 export interface AdminOverview {
-  moderation: { pending: number; approved: number; rejected: number; unpublished: number }
+  moderation: { pending: number; approved: number; edited: number; rejected: number; unpublished: number }
   chainStatus: { status: number; count: number; reward: string }[]
   people: { users: number; new7d: number; wallets: number }
   work: { submissions: number; winners: number }
@@ -216,6 +216,10 @@ export interface AdminOverview {
 }
 
 export interface AdminBounty extends Omit<BountySummary, 'summary'> {
+  /** Set when the creator changed the instructions or eligibility text after approval and nobody has looked since. */
+  listingEditedAt: string | null
+  submissionInstructions: string | null
+  eligibility: string | null
   description: string | null
   acceptanceCriteria: string | null
   links: string[]
