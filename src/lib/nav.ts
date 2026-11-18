@@ -25,6 +25,7 @@ import {
   Users,
   Code,
   Bell,
+  Bookmark,
   BarChart3,
   Bot,
   Braces,
@@ -69,6 +70,7 @@ export const WORKSPACE_NAV: NavItem[] = [
 ]
 
 export const ACTIVITY_NAV: NavItem[] = [
+  { to: '/saved', label: 'Saved bounties', icon: Bookmark },
   { to: '/submissions', label: 'Submissions', icon: Inbox },
   { to: '/rewards', label: 'Reward history', icon: Coins },
   { to: '/notifications', label: 'Notifications', icon: Bell },

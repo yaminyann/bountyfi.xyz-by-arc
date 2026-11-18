@@ -6,6 +6,7 @@ import { Callout } from '@/components/ui/Feedback'
 import { Field, Input, Textarea } from '@/components/ui/Form'
 import { useTx } from '@/hooks/useBountyContract'
 import { useAttachNotes, useRefreshBounty } from '@/lib/api/queries'
+import { checkLinks, useEligibility } from '@/lib/api/safety'
 import { errorMessage } from '@/lib/api/client'
 import { MAX_REPORT_BYTES, encryptReport } from '@/lib/crypto'
 import { clearDraft, loadDraft, notesDraftKey, saveDraft } from '@/lib/drafts'
@@ -43,6 +44,8 @@ export function SubmitWork({ onchainId, wallet, alreadySubmittedOnChain, confide
   const tx = useTx()
   const attach = useAttachNotes()
   const refresh = useRefreshBounty()
+  const eligibility = useEligibility(onchainId, true)
+  const blocked = eligibility.data?.eligible === false
 
   const set = (patch: Partial<Draft>) => setForm((f) => ({ ...f, ...patch }))
   const hasCipher = confidential && Boolean(form.cipher)
@@ -101,6 +104,17 @@ export function SubmitWork({ onchainId, wallet, alreadySubmittedOnChain, confide
     saveDraft(key, confidential ? { ...form, description: '', cipher } : form)
     if (confidential) set({ cipher, description: '' })
 
+    // Check the links before any gas is spent: text the server would refuse should never reach the chain.
+    if (!submittedOnChain) {
+      try {
+        const verdicts = await checkLinks([meta.pullRequestUrl, ...meta.attachments].filter((u): u is string => Boolean(u)))
+        const bad = verdicts.find((v) => v.level === 'block')
+        if (bad) return setErrors({ pullRequestUrl: `${bad.host || bad.url}: ${bad.reasons[0]}` })
+      } catch {
+        // The check is a courtesy; the server checks again when the notes are attached.
+      }
+    }
+
     if (!submittedOnChain) {
       try {
         const hash = await submissionCommitment(onchainId, meta)
@@ -117,6 +131,7 @@ export function SubmitWork({ onchainId, wallet, alreadySubmittedOnChain, confide
   }
 
   const busy = tx.pending || attach.isPending
+  const ready = !blocked && !eligibility.isPending
 
   return (
     <form
@@ -127,6 +142,16 @@ export function SubmitWork({ onchainId, wallet, alreadySubmittedOnChain, confide
         void submit()
       }}
     >
+      {blocked && eligibility.data && (
+        <Callout tone="warn" title="You cannot submit to this bounty yet">
+          <ul className="list-disc space-y-1 pl-5">
+            {eligibility.data.reasons.map((reason) => (
+              <li key={reason}>{reason}</li>
+            ))}
+          </ul>
+          <span className="mt-2 block text-xs">The contract accepts any wallet, so BountyFi shows notes only from accounts that meet the creator's rules. Meet them first, so your work is seen.</span>
+        </Callout>
+      )}
       {confidential && (
         <Callout tone="info" title="This bounty takes encrypted reports">
           <span className="inline-flex items-center gap-1.5">
@@ -157,7 +182,7 @@ export function SubmitWork({ onchainId, wallet, alreadySubmittedOnChain, confide
         hint={
           confidential
             ? 'Public and not encrypted. Do not put details of the weakness here. Link the project or the bounty page.'
-            : 'A GitHub pull request or repository, a design file, a document or a report.'
+            : 'A GitHub pull request or repository, a design file, a document or a report. Link shorteners are not accepted.'
         }
       >
         <Input type="url" inputMode="url" placeholder="https://github.com/org/repo/pull/123" value={form.pullRequestUrl} onChange={(e) => set({ pullRequestUrl: e.target.value })} />
@@ -174,7 +199,7 @@ export function SubmitWork({ onchainId, wallet, alreadySubmittedOnChain, confide
         </p>
       )}
 
-      <Button type="submit" variant="primary" size="lg" className="w-full" loading={busy}>
+      <Button type="submit" variant="primary" size="lg" className="w-full" loading={busy} disabled={!ready}>
         {submittedOnChain ? 'Attach notes' : confidential ? 'Encrypt and submit' : 'Submit work'}
       </Button>
     </form>

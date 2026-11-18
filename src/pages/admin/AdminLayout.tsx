@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Activity, ClipboardCheck, Coins, ExternalLink as ExternalIcon, FolderKanban, Inbox, LayoutDashboard, ListChecks, LogOut, Scale, ScrollText, Server, Tags, Users } from 'lucide-react'
+import { Activity, Ban, ClipboardCheck, Coins, Flag, ExternalLink as ExternalIcon, FolderKanban, Inbox, LayoutDashboard, ListChecks, LogOut, Scale, ScrollText, Server, Tags, Users } from 'lucide-react'
 import { ConsoleShell, type ConsoleGroup, type ConsoleItem } from '@/components/layout/ConsoleShell'
 import { Avatar } from '@/components/ui/Address'
 import { Button } from '@/components/ui/Button'
@@ -21,6 +21,7 @@ const GROUPS: { title: string; items: Page[] }[] = [
       { to: '/admin/review', label: 'Review queue', icon: ClipboardCheck, title: 'Review queue', description: 'Funded bounties waiting for approval. Nothing is public until you approve it.' },
       { to: '/admin/bounties', label: 'All bounties', icon: ListChecks, title: 'All bounties', description: 'Every bounty indexed from the contract, with its review state. Earlier decisions can be changed here.' },
       { to: '/admin/submissions', label: 'Submissions', icon: Inbox, title: 'Submissions', description: 'Work submitted on-chain, with the status of its notes and checks.' },
+      { to: '/admin/reports', label: 'Reports', icon: Flag, title: 'Reports', description: 'What people flagged as scams, spam, phishing or copied work. The most reported come first.' },
       { to: '/admin/disputes', label: 'Disputes', icon: Scale, title: 'Disputes', description: 'Mediation threads. Outcomes are recorded and never move USDC.' },
     ],
   },
@@ -42,6 +43,7 @@ const GROUPS: { title: string; items: Page[] }[] = [
   {
     title: 'Platform',
     items: [
+      { to: '/admin/domains', label: 'Blocked links', icon: Ban, title: 'Blocked links', description: 'Domains that new bounties and submissions cannot link to.' },
       { to: '/admin/audit', label: 'Audit log', icon: ScrollText, title: 'Audit log', description: 'Every admin action, with who did it and when.' },
       { to: '/admin/system', label: 'System', icon: Server, title: 'System', description: 'Indexer position, services and the addresses the platform trusts.' },
     ],

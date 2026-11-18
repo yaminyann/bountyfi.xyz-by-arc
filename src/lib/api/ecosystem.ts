@@ -40,6 +40,9 @@ export interface Project extends ProjectCard {
   ownerPhoto: string | null
   status: 'active' | 'hidden'
   createdAt: string
+  /** The owner proved control of the GitHub repository. */
+  verified?: boolean
+  verifiedBy?: string | null
 }
 
 export interface ProjectContributor {
@@ -575,6 +578,9 @@ export interface ListingInput {
   eligibility: string | null
   confidential: boolean
   acceptsApplications: boolean
+  minAccountAgeDays: number
+  requireGithub: boolean
+  minApprovedSubmissions: number
 }
 
 export const useUpdateListing = () =>

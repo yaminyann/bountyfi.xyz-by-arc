@@ -9,6 +9,8 @@ import { timeLeft } from '@/lib/time'
 import { useNow } from '@/hooks/useNow'
 import { PrizeLadder } from '@/components/bounty/PrizeLadder'
 import { StatusBadge } from '@/components/bounty/StatusBadge'
+import { VerifiedBadge } from '@/components/ecosystem/Checks'
+import { SaveButton } from '@/components/ecosystem/SaveButton'
 import { CategoryChip, DifficultyBadge } from '@/components/ecosystem/badges'
 import { Badge } from '@/components/ui/Feedback'
 import { cn } from '@/lib/cn'
@@ -28,7 +30,10 @@ export function BountyCard({ bounty }: { bounty: BountySummary }) {
       >
         <div className="flex items-center justify-between gap-3">
           <StatusBadge status={bounty.status} deadline={bounty.deadline} now={now} />
-          <CategoryChip slug={bounty.category} name={category?.name} icon={category?.icon} />
+          <span className="flex items-center gap-1">
+            <CategoryChip slug={bounty.category} name={category?.name} icon={category?.icon} />
+            <SaveButton onchainId={bounty.onchainId} className="-mr-2" />
+          </span>
         </div>
 
         <h3 className="mt-4 line-clamp-2 min-h-[3.4rem] font-display text-lg font-semibold leading-snug group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">{bounty.title}</h3>
@@ -69,6 +74,7 @@ export function BountyCard({ bounty }: { bounty: BountySummary }) {
             <span className="inline-flex min-w-0 items-center gap-1.5">
               <FolderKanban size={13} aria-hidden className="shrink-0" />
               <span className={cn('truncate', bounty.projectName ? 'font-medium text-ink' : 'num')}>{bounty.projectName ?? shortAddress(bounty.creatorWallet)}</span>
+              {bounty.projectVerified && <VerifiedBadge className="shrink-0" />}
             </span>
             <span className="inline-flex shrink-0 items-center gap-3">
               <span className={cn('inline-flex items-center gap-1.5', live && 'font-medium text-ink')}>

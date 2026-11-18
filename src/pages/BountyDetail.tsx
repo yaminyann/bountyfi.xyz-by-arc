@@ -5,7 +5,10 @@ import { RequireIdentity } from '@/components/layout/RequireIdentity'
 import { PrizeLadder } from '@/components/bounty/PrizeLadder'
 import { ModerationBadge, StatusBadge } from '@/components/bounty/StatusBadge'
 import { ActivityList } from '@/components/ecosystem/ActivityList'
+import { SubmissionChecksList, VerifiedBadge } from '@/components/ecosystem/Checks'
 import { CreatorRecord } from '@/components/ecosystem/CreatorRecord'
+import { ReportButton } from '@/components/ecosystem/ReportButton'
+import { SaveButton } from '@/components/ecosystem/SaveButton'
 import { CategoryChip, DifficultyBadge, ProjectAvatar, ReviewBadge } from '@/components/ecosystem/badges'
 import { AddressChip, Avatar } from '@/components/ui/Address'
 import { Button, ButtonLink, ExternalLink } from '@/components/ui/Button'
@@ -160,12 +163,14 @@ function SubmissionItem({
           {s.status === 'winner' && <Badge tone="signal">{s.position ? `${ordinal(s.position)} place` : 'Winner'}</Badge>}
           {s.status === 'not_selected' && <Badge>Not selected</Badge>}
           <span className="text-xs text-mute">{timeAgo(s.createdAt)}</span>
+          {!self && s.notesVerified && <ReportButton targetType="submission" targetId={s.id} />}
         </div>
       </div>
       {s.description ? (
         <>
           {confidential ? <EncryptedReport text={s.description} isCreator={isCreator} self={self} /> : <p className="prose-plain text-sm">{s.description}</p>}
           <Evidence s={s} />
+          {s.checks && <SubmissionChecksList checks={s.checks} />}
           {githubPr && (
             <div className="flex flex-wrap items-center gap-2">
               <PrBadge s={s} />
@@ -364,6 +369,13 @@ export default function BountyDetail() {
             </Badge>
           )}
           {bounty.acceptsApplications && <Badge tone="info">Apply first{bounty.assignedCount > 0 ? ` · ${bounty.assignedCount} approved` : ''}</Badge>}
+          {(bounty.minAccountAgeDays || bounty.requireGithub || bounty.minApprovedSubmissions) ? (
+            <span title="Notes are shown only from accounts that meet these rules">
+              <Badge>
+                Requires{bounty.minAccountAgeDays ? ` ${bounty.minAccountAgeDays}+ day account` : ''}{bounty.requireGithub ? ' GitHub profile' : ''}{bounty.minApprovedSubmissions ? ` ${bounty.minApprovedSubmissions}+ approved` : ''}
+              </Badge>
+            </span>
+          ) : null}
           <span className="num text-sm text-mute">#{bounty.onchainId}</span>
         </div>
         <h1 className="max-w-4xl font-display text-3xl font-semibold leading-tight sm:text-4xl">{bounty.title}</h1>
@@ -372,6 +384,7 @@ export default function BountyDetail() {
             <Link to={`/projects/${bounty.projectSlug}`} className="inline-flex items-center gap-2 font-medium text-ink hover:underline">
               <ProjectAvatar name={bounty.projectName} logoUrl={bounty.projectLogo} size={22} />
               {bounty.projectName}
+              {bounty.projectVerified && <VerifiedBadge />}
             </Link>
           )}
           <span className="inline-flex items-center gap-2">
@@ -380,6 +393,10 @@ export default function BountyDetail() {
             <AddressChip address={bounty.creatorWallet} self={me === bounty.creatorWallet} />
           </span>
           <span>{formatDate(bounty.createdAt)}</span>
+          <span className="inline-flex items-center gap-1">
+            <SaveButton onchainId={bounty.onchainId} label />
+            {me !== bounty.creatorWallet && <ReportButton targetType="bounty" targetId={String(bounty.onchainId)} />}
+          </span>
         </div>
         <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 rounded-lg border border-line bg-surface p-4 lg:hidden">
           <p className="num font-display text-2xl font-semibold">{formatUsdc(reward)} USDC</p>

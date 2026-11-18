@@ -262,6 +262,7 @@ export default function Explore() {
 
       <section aria-label="Results" className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/15 pb-4">
+          <div className="flex flex-wrap items-center gap-3">
           <div role="radiogroup" aria-label="Bounty status" className="no-scrollbar -mx-1 flex max-w-full gap-1 overflow-x-auto px-1">
             {STATES.map((s) => (
               <button
@@ -278,6 +279,15 @@ export default function Explore() {
                 {s.label}
               </button>
             ))}
+          </div>
+          <button
+            type="button"
+            aria-pressed={difficulty === 'beginner'}
+            onClick={() => update({ difficulty: difficulty === 'beginner' ? undefined : 'beginner' })}
+            className={cn('inline-flex min-h-10 items-center gap-2 rounded-md border px-3.5 text-sm font-medium transition-colors', difficulty === 'beginner' ? 'border-ink bg-signal text-ink' : 'border-line bg-surface text-ink hover:border-ink/40')}
+          >
+            Beginner friendly
+          </button>
           </div>
 
           <div className="flex items-center gap-3">

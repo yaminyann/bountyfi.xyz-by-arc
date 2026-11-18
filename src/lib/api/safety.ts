@@ -61,7 +61,7 @@ export function useSavedBounties(offset = 0) {
 export function useToggleSaved() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ onchainId, saved }: { onchainId: number; saved: boolean }) => (saved ? post(`/me/saved/${onchainId}`).then(() => undefined) : del(`/me/saved/${onchainId}`).then(() => undefined)),
+    mutationFn: ({ onchainId, saved }: { onchainId: number; saved: boolean }) => (saved ? request('PUT', `/me/saved/${onchainId}`).then(() => undefined) : del(`/me/saved/${onchainId}`).then(() => undefined)),
     onMutate: async ({ onchainId, saved }) => {
       await qc.cancelQueries({ queryKey: ['mine', 'saved', 'ids'] })
       const before = qc.getQueryData<number[]>(['mine', 'saved', 'ids']) ?? []

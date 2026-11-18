@@ -9,6 +9,7 @@ import { timeLeft } from '@/lib/time'
 import { useNow } from '@/hooks/useNow'
 import { PrizeLadder } from '@/components/bounty/PrizeLadder'
 import { StatusBadge } from '@/components/bounty/StatusBadge'
+import { SaveButton } from '@/components/ecosystem/SaveButton'
 import { CategoryChip, DifficultyBadge } from '@/components/ecosystem/badges'
 import { Badge } from '@/components/ui/Feedback'
 
@@ -27,6 +28,7 @@ export function BountyRow({ bounty }: { bounty: BountySummary }) {
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
             <StatusBadge status={bounty.status} deadline={bounty.deadline} now={now} />
+            <SaveButton onchainId={bounty.onchainId} className="-ml-1" />
             <CategoryChip slug={bounty.category} name={category?.name} icon={category?.icon} />
             {bounty.difficulty && <DifficultyBadge difficulty={bounty.difficulty} />}
             {bounty.workMode === 'team' && (

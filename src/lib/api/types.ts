@@ -48,6 +48,11 @@ export interface BountySummary {
   workMode: WorkMode
   confidential: boolean
   acceptsApplications: boolean
+  /** Who may have notes shown. Zero, false and zero mean anyone. */
+  minAccountAgeDays?: number
+  requireGithub?: boolean
+  minApprovedSubmissions?: number
+  projectVerified?: boolean | null
   assignedCount: number
   projectSlug: string | null
   projectName: string | null
@@ -118,6 +123,16 @@ export interface Submission {
   prTitle: string | null
   prCheckedAt: string | null
   prAuthorMatchesProfile: boolean
+  /** Automatic checks, shown to the creator, the contributor and admins only. */
+  checks?: SubmissionChecks | null
+}
+
+export interface SubmissionChecks {
+  notesMatchHash: boolean
+  words: number
+  proofGiven: boolean
+  links: { level: 'ok' | 'warn' | 'block'; host: string; reasons: string[] }[]
+  duplicateOf: { bountyId: number; score: number; sameWallet: boolean } | null
 }
 
 export interface ActivityItem {

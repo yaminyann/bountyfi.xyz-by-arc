@@ -21,6 +21,8 @@ const TITLES: [string, string][] = [
   ['/notifications', 'Notifications'],
   ['/settings', 'Settings and wallet'],
   ['/wallet', 'Wallet and funds'],
+  ['/saved', 'Saved bounties'],
+  ['/leaving', 'Leaving BountyFi'],
   ['/admin', 'Admin console'],
 ]
 

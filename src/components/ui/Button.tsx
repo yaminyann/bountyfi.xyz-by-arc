@@ -76,9 +76,22 @@ interface ExternalLinkProps {
   className?: string
 }
 
+/** Hosts BountyFi itself points to. Every other address came from a user, so it goes through the "leaving" page first. */
+const TRUSTED_HOSTS = ['github.com', 'bountyfi.xyz', 'circle.com', 'arc.io', 'arc.network', 'usdc.com']
+
+function throughLeaving(href: string): string {
+  try {
+    const host = new URL(href).hostname.toLowerCase()
+    if (TRUSTED_HOSTS.some((t) => host === t || host.endsWith(`.${t}`))) return href
+  } catch {
+    return '#'
+  }
+  return `/leaving?to=${encodeURIComponent(href)}`
+}
+
 /** Plain text link that opens off-site safely. */
 export function ExternalLink({ href, children, className }: ExternalLinkProps) {
-  const safe = /^https?:\/\//i.test(href) ? href : '#'
+  const safe = /^https?:\/\//i.test(href) ? throughLeaving(href) : '#'
   return (
     <a
       href={safe}

@@ -13,6 +13,7 @@ import { useIdentity } from '@/contexts/IdentityContext'
 import { BOUNTY_BOARD_ABI, useTx, useUsdcAccount } from '@/hooks/useBountyContract'
 import { errorMessage } from '@/lib/api/client'
 import { useAppConfig, usePublishBounty, useRefreshBounty } from '@/lib/api/queries'
+import { checkLinks } from '@/lib/api/safety'
 import { bountyDraftKey, clearDraft, loadDraft, saveDraft } from '@/lib/drafts'
 import { BountyMetadataSchema, bountyCommitment, splitLines, splitTags } from '@/lib/metadata'
 import { computePayouts, formatUsdc, parseUsdc, postFee } from '@/lib/money'
@@ -176,6 +177,19 @@ export default function CreateBounty() {
     let onchainId = created
     let txHash = ''
     try {
+      // 0. check the links before any gas is spent: the server refuses text it would not publish
+      if (onchainId === null && meta.links.length > 0) {
+        try {
+          const bad = (await checkLinks(meta.links)).find((v) => v.level === 'block')
+          if (bad) {
+            setErrors((e) => ({ ...e, links: `${bad.host || bad.url}: ${bad.reasons[0]}` }))
+            setRunning(false)
+            return
+          }
+        } catch {
+          // The check is a courtesy; the server checks again when the bounty is published.
+        }
+      }
       // 1. create
       if (onchainId === null) {
         mark('create', 'active')
@@ -296,7 +310,19 @@ export default function CreateBounty() {
           <fieldset className="space-y-5" disabled={locked}>
             <legend className="mb-1 font-display text-lg font-semibold">Listing details</legend>
             <p className="-mt-1 pb-3 text-sm text-mute">How people find the bounty. Stored on BountyFi and editable later; not part of the on-chain text.</p>
-            <ListingFields value={view.listing} onChange={(listing) => set('listing', listing)} />
+            <ListingFields
+              value={view.listing}
+              onChange={(listing) => set('listing', listing)}
+              onApplyTemplate={(tpl) =>
+                setForm((f) => {
+                  const points = tpl.criteria.map((c) => `- ${c}`).join('\n')
+                  const current = f.acceptanceCriteria.trim()
+                  const criteria = current ? (tpl.criteria.every((c) => current.includes(c)) ? f.acceptanceCriteria : `${current}\n\n${points}`) : points
+                  const asked = f.listing.instructions.trim()
+                  return { ...f, acceptanceCriteria: criteria.slice(0, 5000), listing: { ...f.listing, instructions: asked || tpl.instructions } }
+                })
+              }
+            />
           </fieldset>
 
           <fieldset className="space-y-5" disabled={locked}>

@@ -19,6 +19,7 @@ import {
   type ProjectContributor,
   type ProjectReward,
 } from '@/lib/api/ecosystem'
+import { VerifiedBadge } from '@/components/ecosystem/Checks'
 import { ApiError } from '@/lib/api/client'
 import { formatUsdc, ordinal } from '@/lib/money'
 import { formatDate, timeAgo } from '@/lib/time'
@@ -254,6 +255,7 @@ export default function ProjectPage() {
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-2xl font-semibold sm:text-3xl">{project.name}</h1>
+              {project.verified && <VerifiedBadge by={project.verifiedBy} />}
               {project.status === 'hidden' && <Badge tone="warn">Hidden by an admin</Badge>}
             </div>
             {project.tagline && <p className="mt-1 text-mute">{project.tagline}</p>}

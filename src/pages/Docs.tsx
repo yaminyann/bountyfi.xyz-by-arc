@@ -6,6 +6,7 @@ import { Reveal } from '@/components/motion/Reveal'
 import { ButtonLink } from '@/components/ui/Button'
 import { useAppConfig } from '@/lib/api/queries'
 import { useCategories } from '@/lib/api/ecosystem'
+import { PROOF } from '@/lib/templates'
 import { appChain, explorerAddress } from '@/lib/chain'
 import { cn } from '@/lib/cn'
 
@@ -65,32 +66,6 @@ function Pair({ term, children }: { term: string; children: ReactNode }) {
       <dd className="text-sm text-mute">{children}</dd>
     </div>
   )
-}
-
-/** What to ask for as proof of finished work in each kind of work. The creator reviews it against the acceptance criteria. */
-const PROOF: Record<string, string> = {
-  security: 'A written report with steps to reproduce. Turn on encrypted reports for anything sensitive.',
-  development: 'A pull request link. Its state and author are read from GitHub and shown next to the submission.',
-  design: 'Source files or a public prototype link, with the usage rights stated.',
-  research: 'A report with its sources and the data behind each claim.',
-  community: 'Public links to the posts, threads or sessions, with the results the task asked for.',
-  testing: 'A test report with the steps taken, what was found and how to repeat it.',
-  'smart-contracts': 'A branch or pull request with passing tests and a short note on what the tests cover.',
-  docs: 'The published page or a pull request, tested by following it on a clean setup.',
-  content: 'The published article link, with sources and the length the task asked for.',
-  translation: 'The translated files or a pull request, reviewed by a second native speaker.',
-  video: 'A public link and the source project file, with captions where the task asks for them.',
-  marketing: 'A log of what was sent, who replied and what came of it.',
-  data: 'A public dashboard link with the queries linked, so the numbers can be rerun.',
-  governance: 'The proposal text or forum link, with the template or worked example the task asked for.',
-  defi: 'A reproducible notebook or model, with the scenarios and a written conclusion.',
-  ai: 'A repository with a documented tool and a passing test run.',
-  infrastructure: 'The configuration, a runbook and proof that a test alert fired.',
-  payments: 'A working demo that completes a test payment, plus the pull request.',
-  games: 'Layered source files and a delivery note that states the usage rights.',
-  education: 'The outline, slides and exercises, or a recording of the session.',
-  events: 'A recording or summary, the attendance list and the follow-up post.',
-  support: 'A log of the tickets triaged or questions answered, with links.',
 }
 
 interface DocSection {
@@ -349,6 +324,18 @@ function useSections(): DocSection[] {
           <P>
             For confidential bounties such as security reports, a contributor encrypts the report in the browser to the creator’s public key. The server stores only ciphertext. The creator’s private key is wrapped with a key derived from a wallet signature, so the server never holds it in the clear. The creator sets the key once and chooses encrypted mode before the first submission.
           </P>
+          <H3>Verified projects</H3>
+          <P>
+            A project owner can prove control of the project's GitHub repository by committing a small file that holds a code from BountyFi. BountyFi reads that one file from github.com and shows a Verified badge. The badge says who runs the page. It does not judge the work, and it is removed when the repository address changes.
+          </P>
+          <H3>Checks on every submission</H3>
+          <P>
+            Each submission shows the result of automatic checks next to it: whether the notes match the hash, how many words they hold, whether proof was given, how each link was rated, and whether the text looks copied from another submission. These are signals for the reviewer. They never pick a winner.
+          </P>
+          <H3>Who can submit</H3>
+          <P>
+            The contract accepts a submission from any wallet, so a creator can set rules that decide whose notes BountyFi shows: a minimum account age, a GitHub profile, or approved work before. A person who does not meet them sees why, before they pay gas. New accounts also have lower daily limits for posting and submitting.
+          </P>
           <H3>README badge</H3>
           <P>
             Every active project has a live badge at <Code>/api/badge/&lt;project&gt;.svg</Code> showing its open bounties and USDC paid.
@@ -378,10 +365,21 @@ function useSections(): DocSection[] {
           </Ul>
           <H3>What BountyFi already does</H3>
           <P>
-            It lists a bounty only after the prize is escrowed and an admin has reviewed it, locks the text by its hash, accepts one submission per wallet, requires a Google account and a linked wallet to act, limits how fast an account can write, and accepts only https links. It has no file uploads.
+            It lists a bounty only after the prize is escrowed and an admin has reviewed it, locks the text by its hash, accepts one submission per wallet, requires a Google account and a linked wallet to act, and accepts only https links. It has no file uploads.
           </P>
           <P>
-            It does not yet score links for safety, cap submissions per account or verify a project’s identity. Do not treat the absence of a warning as proof that something is safe. Report a problem through the address in <Code>/.well-known/security.txt</Code>.
+            Links are rated by their shape before they are saved: link shorteners, direct downloads, addresses written as numbers and risky domain endings are refused or flagged, and admins keep a list of blocked domains. BountyFi never opens a link a user typed, so it cannot be turned against another site. Links to other sites go through a page that shows where you are going first. Posting and submitting have daily limits that are lower for new accounts.
+          </P>
+          <H3>Report a bounty or a submission</H3>
+          <P>
+            Every bounty and submission has a Report button. Choose scam, spam, phishing, copied work or another reason. Admins see the most reported items first. One open report per person per item.
+          </P>
+          <H3>Save and follow</H3>
+          <P>
+            Save a bounty to find it again under Saved. Creators are reminded to review once the deadline has passed, contributors are told when a review is overdue, and winners are reminded to claim before the window closes.
+          </P>
+          <P>
+            It does not read the content behind a link, scan files or score people. Do not treat the absence of a warning as proof that something is safe. Report a security problem through the address in <Code>/.well-known/security.txt</Code>.
           </P>
         </>
       ),

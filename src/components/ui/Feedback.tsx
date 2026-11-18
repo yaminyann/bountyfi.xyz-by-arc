@@ -20,6 +20,7 @@ import {
   Settings,
   Trophy,
   Users,
+  Bookmark,
   Wallet,
   XCircle,
   type LucideProps,
@@ -165,6 +166,7 @@ const HEADER_ICONS: [string, ComponentType<LucideProps>][] = [
   ['/notifications', Bell],
   ['/settings', Settings],
   ['/wallet', Wallet],
+  ['/saved', Bookmark],
 ]
 
 /** Page title block shared by every inner page: an icon tile chosen from the route, the title, and a hairline below. */

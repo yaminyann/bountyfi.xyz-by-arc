@@ -3,6 +3,8 @@ import { Field, Input, Select, Textarea } from '@/components/ui/Form'
 import { useCategories, useEncryptionKey, useMyProjects, useRecurringPrograms, type ListingInput } from '@/lib/api/ecosystem'
 import type { Difficulty, WorkMode } from '@/lib/api/types'
 import { splitTags } from '@/lib/metadata'
+import { templateFor, type SectorTemplate } from '@/lib/templates'
+import { Button } from '@/components/ui/Button'
 
 /** Form state for the listing details that sit beside a bounty. They are not part of the on-chain content hash. */
 export interface ListingForm {
@@ -16,6 +18,9 @@ export interface ListingForm {
   eligibility: string
   confidential: boolean
   acceptsApplications: boolean
+  minAccountAgeDays: number
+  requireGithub: boolean
+  minApprovedSubmissions: number
 }
 
 export const EMPTY_LISTING: ListingForm = {
@@ -29,6 +34,9 @@ export const EMPTY_LISTING: ListingForm = {
   eligibility: '',
   confidential: false,
   acceptsApplications: false,
+  minAccountAgeDays: 0,
+  requireGithub: false,
+  minApprovedSubmissions: 0,
 }
 
 export function toListingInput(form: ListingForm): ListingInput {
@@ -43,6 +51,9 @@ export function toListingInput(form: ListingForm): ListingInput {
     eligibility: form.eligibility.trim() || null,
     confidential: form.confidential,
     acceptsApplications: form.acceptsApplications,
+    minAccountAgeDays: form.minAccountAgeDays,
+    requireGithub: form.requireGithub,
+    minApprovedSubmissions: form.minApprovedSubmissions,
   }
 }
 
@@ -52,15 +63,18 @@ interface Props {
   disabled?: boolean
   /** Hide fields that make no sense once a bounty has started (team mode can still be changed before winners). */
   compact?: boolean
+  /** When given, a panel offers a ready-made proof and checklist for the chosen kind of work. */
+  onApplyTemplate?: (template: SectorTemplate) => void
 }
 
-export function ListingFields({ value, onChange, disabled, compact }: Props) {
+export function ListingFields({ value, onChange, disabled, compact, onApplyTemplate }: Props) {
   const categories = useCategories()
   const projects = useMyProjects(true)
   const programs = useRecurringPrograms(value.project || undefined)
   const encryptionKey = useEncryptionKey(true)
   const set = <K extends keyof ListingForm>(key: K, v: ListingForm[K]) => onChange({ ...value, [key]: v })
   const ownPrograms = (programs.data ?? []).filter((p) => p.active)
+  const template = onApplyTemplate && value.category ? templateFor(value.category) : null
 
   return (
     <div className="space-y-5">
@@ -84,6 +98,26 @@ export function ListingFields({ value, onChange, disabled, compact }: Props) {
           </Select>
         </Field>
       </div>
+
+      {template && onApplyTemplate && (
+        <div className="space-y-3 rounded-lg border border-line bg-paper p-4 text-sm">
+          <div>
+            <p className="font-medium">A checklist for this kind of work</p>
+            <p className="mt-1 text-mute">
+              <span className="font-medium text-ink">Ask for:</span> {template.proof}
+            </p>
+          </div>
+          <ul className="list-disc space-y-1 pl-5 text-mute">
+            {template.criteria.map((c) => (
+              <li key={c}>{c}</li>
+            ))}
+          </ul>
+          <Button type="button" variant="secondary" size="sm" disabled={disabled} onClick={() => onApplyTemplate(template)}>
+            Use this checklist
+          </Button>
+          <p className="text-xs text-mute">It fills the requirements and the submission instructions where they are empty, or adds to them. You can edit everything.</p>
+        </div>
+      )}
 
       <Field label="Skills" optional hint="Comma separated, up to 8. Contributors filter by these.">
         <Input value={value.skills} disabled={disabled} onChange={(e) => set('skills', e.target.value)} placeholder="solidity, react, copywriting" />
@@ -138,6 +172,38 @@ export function ListingFields({ value, onChange, disabled, compact }: Props) {
           </span>
         </label>
       </div>
+
+      <fieldset className="space-y-4 rounded-lg border border-line bg-paper p-4">
+        <legend className="px-1 text-sm font-medium">Who can submit</legend>
+        <p className="text-sm text-mute">
+          The contract accepts any wallet, so these rules decide whose notes BountyFi shows on your bounty. A submission without shown notes is invisible to everyone. They help keep spam and throwaway accounts away.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Account at least">
+            <Select value={String(value.minAccountAgeDays)} disabled={disabled} onChange={(e) => set('minAccountAgeDays', Number(e.target.value))}>
+              <option value="0">Any age</option>
+              <option value="1">1 day old</option>
+              <option value="7">7 days old</option>
+              <option value="30">30 days old</option>
+            </Select>
+          </Field>
+          <Field label="Approved work before">
+            <Select value={String(value.minApprovedSubmissions)} disabled={disabled} onChange={(e) => set('minApprovedSubmissions', Number(e.target.value))}>
+              <option value="0">No history needed</option>
+              <option value="1">1 approved submission</option>
+              <option value="3">3 approved submissions</option>
+              <option value="10">10 approved submissions</option>
+            </Select>
+          </Field>
+        </div>
+        <label className="flex items-start gap-3 text-sm">
+          <input type="checkbox" className="mt-1 size-4 accent-ink" checked={value.requireGithub} disabled={disabled} onChange={(e) => set('requireGithub', e.target.checked)} />
+          <span>
+            <span className="block font-medium">Require a GitHub profile</span>
+            <span className="block text-mute">The contributor must have added a GitHub address to their profile.</span>
+          </span>
+        </label>
+      </fieldset>
 
       <div className="rounded-lg border border-line bg-paper p-4">
         <label className="flex items-start gap-3 text-sm">

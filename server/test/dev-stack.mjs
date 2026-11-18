@@ -114,6 +114,9 @@ const env = {
   TREASURY_ADDRESS: TREASURY,
   INDEXER_START_BLOCK: String(boardReceipt.blockNumber),
   INDEXER_POLL_MS: '700',
+  TRUST_NEW_ACCOUNT_HOURS: '0',
+  TRUST_BOUNTIES_PER_DAY: '200',
+  TRUST_SUBMISSIONS_PER_DAY: '200',
 }
 const server = spawn('node', ['server/dist/index.js'], { cwd: root, env, stdio: 'inherit' })
 for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => { server.kill(); process.exit(0) })

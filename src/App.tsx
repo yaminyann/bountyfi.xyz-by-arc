@@ -33,6 +33,8 @@ const Rewards = lazy(() => import('@/pages/workspace/Rewards'))
 const Notifications = lazy(() => import('@/pages/workspace/Notifications'))
 const Settings = lazy(() => import('@/pages/workspace/Settings'))
 const WalletHub = lazy(() => import('@/pages/workspace/WalletHub'))
+const Saved = lazy(() => import('@/pages/workspace/Saved'))
+const Leaving = lazy(() => import('@/pages/Leaving'))
 
 const AdminLayout = lazy(() => import('@/pages/admin/AdminLayout'))
 const AdminOverview = lazy(() => import('@/pages/admin/Overview'))
@@ -47,6 +49,8 @@ const AdminSystem = lazy(() => import('@/pages/admin/Lists').then((m) => ({ defa
 const AdminProjects = lazy(() => import('@/pages/admin/Catalog').then((m) => ({ default: m.Projects })))
 const AdminCategories = lazy(() => import('@/pages/admin/Catalog').then((m) => ({ default: m.Categories })))
 const AdminDisputes = lazy(() => import('@/pages/admin/Catalog').then((m) => ({ default: m.Disputes })))
+const AdminReports = lazy(() => import('@/pages/admin/Safety').then((m) => ({ default: m.Reports })))
+const AdminDomains = lazy(() => import('@/pages/admin/Safety').then((m) => ({ default: m.Domains })))
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -76,6 +80,7 @@ export default function App() {
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/developers" element={<Developers />} />
         <Route path="/docs" element={<Docs />} />
+        <Route path="/leaving" element={<Leaving />} />
         <Route path="/vision" element={<Navigate to="/docs#vision" replace />} />
 
         {/* Signed-in workspace */}
@@ -92,6 +97,7 @@ export default function App() {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/wallet" element={<WalletHub />} />
+          <Route path="/saved" element={<Saved />} />
           <Route path="/disputes/:id" element={<DisputePage />} />
         </Route>
 
@@ -110,6 +116,8 @@ export default function App() {
           <Route path="disputes" element={<AdminDisputes />} />
           <Route path="revenue" element={<AdminRevenue />} />
           <Route path="activity" element={<AdminActivity />} />
+          <Route path="reports" element={<AdminReports />} />
+          <Route path="domains" element={<AdminDomains />} />
           <Route path="audit" element={<AdminAudit />} />
           <Route path="system" element={<AdminSystem />} />
         </Route>

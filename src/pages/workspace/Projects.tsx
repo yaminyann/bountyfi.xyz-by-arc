@@ -31,6 +31,7 @@ import {
   type RecurringProgram,
 } from '@/lib/api/ecosystem'
 import { useNow } from '@/hooks/useNow'
+import { ProjectVerification } from '@/features/project/Verification'
 import { useMyBounties } from '@/lib/api/queries'
 import { formatUsdc, parseUsdc } from '@/lib/money'
 import { formatDate } from '@/lib/time'
@@ -630,6 +631,7 @@ export function ManageProject() {
                 }}
                 onSaved={() => navigate(`/workspace/projects/${query.data.project.slug}`)}
               />
+              <ProjectVerification slug={query.data.project.slug} githubUrl={query.data.project.githubUrl} verified={Boolean(query.data.project.verified)} verifiedBy={query.data.project.verifiedBy ?? null} isOwner={query.data.role === 'owner'} />
               <BadgeSnippet slug={query.data.project.slug} />
               </div>
             )}

@@ -20,6 +20,9 @@ function formFrom(bounty: BountyDetail): ListingForm {
     eligibility: bounty.eligibility ?? '',
     confidential: bounty.confidential,
     acceptsApplications: bounty.acceptsApplications,
+    minAccountAgeDays: bounty.minAccountAgeDays ?? 0,
+    requireGithub: bounty.requireGithub ?? false,
+    minApprovedSubmissions: bounty.minApprovedSubmissions ?? 0,
   }
 }
 
